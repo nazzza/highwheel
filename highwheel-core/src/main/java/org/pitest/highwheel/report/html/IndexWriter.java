@@ -17,6 +17,7 @@ public class IndexWriter extends BaseWriter {
     super(streams);
   }
 
+  @Override
   public void start(final CodeStats stats) {
     writeHeader(INDEX);
     writeIndex("<header>");
@@ -37,20 +38,27 @@ public class IndexWriter extends BaseWriter {
   }
 
   @Override
-  public void visitPackageScc(final DirectedGraph<ElementName, Dependency> scc) {
+  public void visitPackageScc(
+      final DirectedGraph<ElementName, Dependency> scc) {
     final String sccFile = getCurrentPackageSccName();
     final ElementName firstPackage = scc.getVertices().iterator().next();
     writeIndex("<li><a href=\"" + sccFile + "\">" + firstPackage + " and "
         + (scc.getVertexCount() - 1) + " others</a></li>");
   }
 
-  public void visitSubCycle(final DirectedGraph<ElementName, Dependency> cycle) {
+  @Override
+  public void visitSubCycle(
+      final DirectedGraph<ElementName, Dependency> cycle) {
 
   }
 
+  @Override
   public void end() {
     writeIndex("</ul></section>");
-    writeIndex("<section><h1>Lost tests</h1><ul><li><a href=\"lost_tests.html\">lost_tests</a></li></ul></section>");
+    writeIndex(
+        "<section><h1>Lost tests</h1><ul><li><a href=\"lost_tests.html\">lost_tests</a></li></ul></section>");
+    writeIndex(
+        "<section><h1>Orphan groups</h1><ul><li><a href=\"orphan_groups.html\">orphan_groups</a></li></ul></section>");
 
     this.writeFooter(INDEX);
   }
@@ -59,23 +67,27 @@ public class IndexWriter extends BaseWriter {
     write(INDEX, value);
   }
 
+  @Override
   public void visitClassSubCycle(
       final DirectedGraph<ElementName, Dependency> each) {
 
   }
 
+  @Override
   public void endPackageStronglyConnectedComponent(
       final DirectedGraph<ElementName, Dependency> scc) {
 
   }
 
+  @Override
   public void endClassStronglyConnectedComponent(
       final DirectedGraph<ElementName, Dependency> scc) {
 
   }
 
   @Override
-  protected void visitClassScc(final DirectedGraph<ElementName, Dependency> scc) {
+  protected void visitClassScc(
+      final DirectedGraph<ElementName, Dependency> scc) {
     final String sccFile = this.getCurrentClassSccName();
     final ElementName firstClass = scc.getVertices().iterator().next();
     writeIndex("<li><a href=\"" + sccFile + "\">" + firstClass + " and "
@@ -83,11 +95,11 @@ public class IndexWriter extends BaseWriter {
 
   }
 
+  @Override
   public void endClassCycles() {
     writeIndex("</ul></section>");
     writeIndex("<section><h1>Packages cycles</h1><ul>");
 
   }
-
 
 }
