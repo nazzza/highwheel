@@ -42,6 +42,7 @@ public class HighWheelIT {
   private File analyse(String project) throws Exception {
     File testDir = prepare(project);
     runHighwheel();
+    System.err.println("Analysed " + project + " at " + testDir);
     LOG.info("Analysed " + project + " at " + testDir);
     return testDir;
   }

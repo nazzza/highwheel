@@ -7,9 +7,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import nu.validator.htmlparser.common.XmlViolationPolicy;
-import nu.validator.htmlparser.dom.HtmlDocumentBuilder;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -25,16 +22,18 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import nu.validator.htmlparser.common.XmlViolationPolicy;
+import nu.validator.htmlparser.dom.HtmlDocumentBuilder;
 
 public class IndexWriterTest {
 
-  private IndexWriter           testee;
+  private IndexWriter testee;
 
   @Mock
-  private DependencyOracle      scorer;
+  private DependencyOracle scorer;
 
   @Mock
-  private StreamFactory         streams;
+  private StreamFactory streams;
 
   private ByteArrayOutputStream os;
 
@@ -76,7 +75,7 @@ public class IndexWriterTest {
     final NodeList links = d.getElementsByTagName("a");
     assertThat(
         links.item(0).getAttributes().getNamedItem("href").getTextContent())
-        .isEqualTo("classes.html");
+            .isEqualTo("classes.html");
   }
 
   @Test
@@ -87,7 +86,7 @@ public class IndexWriterTest {
     final NodeList links = d.getElementsByTagName("a");
     assertThat(
         links.item(1).getAttributes().getNamedItem("href").getTextContent())
-        .isEqualTo("packages.html");
+            .isEqualTo("packages.html");
   }
 
   @Test
@@ -106,14 +105,27 @@ public class IndexWriterTest {
     assertFirstLinkIs("class_tangle_0.html");
   }
 
-  private void assertFirstLinkIs(String value) throws SAXException, IOException {
+  // @Test
+  // public void shouldGenerateAnOrphanGroupsSection() throws Exception {
+  // this.testee.start(emptyCodeStats());
+  // this.testee.end();
+  // final Document d = parseOutput();
+  // final NodeList header = d.getElementsByTagName("orphangroups");
+  // //experimental
+  //
+  // assertThat(header.getLength()).isEqualTo(1);
+  // assertThat(header.item(0).getFirstChild().getNodeName()).isEqualTo("h1");
+  // }
+
+  private void assertFirstLinkIs(String value)
+      throws SAXException, IOException {
     final Document d = parseOutput();
     final NodeList links = d.getElementsByTagName("a");
     assertThat(
         links.item(0).getAttributes().getNamedItem("href").getTextContent())
-        .isEqualTo(value);
+            .isEqualTo(value);
   }
-  
+
   private DirectedSparseGraph<ElementName, Dependency> smallCycle() {
     final DirectedSparseGraph<ElementName, Dependency> scc = new DirectedSparseGraph<ElementName, Dependency>();
     final Dependency dep = new Dependency();
