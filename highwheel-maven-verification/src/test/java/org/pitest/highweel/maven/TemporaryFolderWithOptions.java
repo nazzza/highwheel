@@ -11,7 +11,7 @@ public class TemporaryFolderWithOptions extends TemporaryFolder {
   private final boolean clean;
 
   TemporaryFolderWithOptions() {
-    this(false);
+    this(true);
   }
 
   public TemporaryFolderWithOptions(boolean clean) {

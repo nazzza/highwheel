@@ -8,9 +8,6 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import nu.validator.htmlparser.common.XmlViolationPolicy;
-import nu.validator.htmlparser.dom.HtmlDocumentBuilder;
-
 import org.apache.maven.it.VerificationException;
 import org.apache.maven.it.Verifier;
 import org.apache.maven.it.util.ResourceExtractor;
@@ -21,24 +18,27 @@ import org.pitest.highwheel.Highwheel;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import nu.validator.htmlparser.common.XmlViolationPolicy;
+import nu.validator.htmlparser.dom.HtmlDocumentBuilder;
+
 public class HighWheelIT {
 
-  private final static String  VERSION    = getVersion();
-  
+  private final static String VERSION = getVersion();
+
   private final static Logger LOG = Logger.getAnonymousLogger();
 
   @Rule
-  public TemporaryFolder testFolder = new TemporaryFolderWithOptions();
+  public TemporaryFolder testFolder = new TemporaryFolderWithOptions(false);
 
-  private Verifier       verifier;
- 
+  private Verifier verifier;
+
   @Test
   public void shouldProduceAnIndexFile() throws Exception {
     File testDir = analyse("/minimal-test");
     Document actual = readIndex(testDir);
     assertThat(actual.getElementsByTagName("body").getLength()).isEqualTo(1);
   }
-  
+
   private File analyse(String project) throws Exception {
     File testDir = prepare(project);
     runHighwheel();
@@ -47,25 +47,26 @@ public class HighWheelIT {
   }
 
   private void runHighwheel() throws VerificationException {
-    verifier.executeGoal("compile");  
-    verifier.executeGoal("org.pitest:highwheel-maven:" + VERSION + ":analyse");  
+    verifier.executeGoal("compile");
+    verifier.executeGoal("org.pitest:highwheel-maven:" + VERSION + ":analyse");
   }
 
-  private File prepare(String testPath) throws IOException,
-      VerificationException {
-    String path = ResourceExtractor.extractResourcePath(getClass(), testPath,
-        testFolder.getRoot(), true).getAbsolutePath();
-    
+  private File prepare(String testPath)
+      throws IOException, VerificationException {
+    String path = ResourceExtractor
+        .extractResourcePath(getClass(), testPath, testFolder.getRoot(), true)
+        .getAbsolutePath();
+
     verifier = new Verifier(path);
     verifier.setAutoclean(false);
     verifier.setDebug(true);
     return new File(testFolder.getRoot().getAbsolutePath() + testPath);
   }
-  
+
   private Document readIndex(File testDir) throws Exception {
-    File indexFile = new File(testDir.getAbsoluteFile() + File.separator
-        + "target" + File.separator + "highwheel" + File.separator
-        + "index.html");
+    File indexFile = new File(
+        testDir.getAbsoluteFile() + File.separator + "target" + File.separator
+            + "highwheel" + File.separator + "index.html");
     return parseHtml(indexFile);
   }
 
@@ -87,6 +88,5 @@ public class HighWheelIT {
         XmlViolationPolicy.FATAL);
     return html.parse(file);
   }
-  
 
 }
