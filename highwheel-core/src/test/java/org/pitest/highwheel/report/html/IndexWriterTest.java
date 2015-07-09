@@ -90,6 +90,29 @@ public class IndexWriterTest {
   }
 
   @Test
+  public void shouldLinkToLostTestsReport() throws SAXException, IOException {
+    this.testee.start(emptyCodeStats());
+    this.testee.end();
+    final Document d = parseOutput();
+    final NodeList links = d.getElementsByTagName("a");
+    assertThat(
+        links.item(2).getAttributes().getNamedItem("href").getTextContent())
+            .isEqualTo("lost_tests.html");
+  }
+
+  @Test
+  public void shouldLinkToOrphanGroupsReport()
+      throws SAXException, IOException {
+    this.testee.start(emptyCodeStats());
+    this.testee.end();
+    final Document d = parseOutput();
+    final NodeList links = d.getElementsByTagName("a");
+    assertThat(
+        links.item(3).getAttributes().getNamedItem("href").getTextContent())
+            .isEqualTo("orphan_groups.html");
+  }
+
+  @Test
   public void shouldLinkToPackageSccs() throws SAXException, IOException {
     final DirectedSparseGraph<ElementName, Dependency> scc = smallCycle();
     this.testee.visitPackageScc(scc);
@@ -105,30 +128,17 @@ public class IndexWriterTest {
     assertFirstLinkIs("class_tangle_0.html");
   }
 
-  // test meant to fail
   // @Test
   // public void shouldGenerateAnOrphanGroupsSection() throws Exception {
   // this.testee.start(emptyCodeStats());
   // this.testee.end();
   // final Document d = parseOutput();
-  // final NodeList header = d.getElementsByTagName("thisismeanttofail"); //
+  // final NodeList header = d.getElementsByTagName("orphangroups"); //
   // experimental
   //
   // assertThat(header.getLength()).isEqualTo(1);
   // assertThat(header.item(0).getFirstChild().getNodeName()).isEqualTo("h1");
   // }
-
-  // test meant to pass
-  @Test
-  public void shouldGenerateAnOrphanGroupsSection() throws Exception {
-    this.testee.start(emptyCodeStats());
-    this.testee.end();
-    final Document d = parseOutput();
-    final NodeList header = d.getElementsByTagName("orphangroups"); // experimental
-
-    assertThat(header.getLength()).isEqualTo(1);
-    assertThat(header.item(0).getFirstChild().getNodeName()).isEqualTo("h1");
-  }
 
   private void assertFirstLinkIs(String value)
       throws SAXException, IOException {
