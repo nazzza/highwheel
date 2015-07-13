@@ -128,18 +128,6 @@ public class IndexWriterTest {
     assertFirstLinkIs("class_tangle_0.html");
   }
 
-  // @Test
-  // public void shouldGenerateAnOrphanGroupsSection() throws Exception {
-  // this.testee.start(emptyCodeStats());
-  // this.testee.end();
-  // final Document d = parseOutput();
-  // final NodeList header = d.getElementsByTagName("orphangroups"); //
-  // experimental
-  //
-  // assertThat(header.getLength()).isEqualTo(1);
-  // assertThat(header.item(0).getFirstChild().getNodeName()).isEqualTo("h1");
-  // }
-
   private void assertFirstLinkIs(String value)
       throws SAXException, IOException {
     final Document d = parseOutput();
