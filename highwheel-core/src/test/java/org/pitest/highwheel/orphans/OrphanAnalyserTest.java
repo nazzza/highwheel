@@ -89,30 +89,29 @@ public class OrphanAnalyserTest<V, E> {
     entries = new ArrayList<String>();
     entries.add("foo");
     graph.addEdge(1, "foo", "bar");
-    // System.out.println("get neighbors: " + graph.getNeighbors("foo"));
-    // printAllInfo("shouldReturnNoOrphansWhenAllAreConnectedToAnEntryPoint");
+    graph.addEdge(2, "foo", "kro");
+    graph.addEdge(3, "foo", "car");
+    graph.addEdge(4, "moo", "foo");
+    System.out.println("edges for foo: " + graph.getIncidentEdges("foo"));
+    System.out.println("get neighbors for foo: " + graph.getNeighbors("foo"));
+    System.out
+        .println("getPredecessors for foo: " + graph.getPredecessors("foo"));
+    System.out.println("getSuccessors for foo: " + graph.getSuccessors("foo"));
+    printAllInfo("shouldReturnNoOrphansWhenAllAreConnectedToAnEntryPoint");
     assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
   }
 
-  // @Test
+  @Test
   public void shouldReturnnAnOrphanWhenEntryPointIsDestNotSource() {
     testee = new OrphanAnalyser<String, Integer>();
     graph = new DirectedSparseGraph<String, Integer>();
     entries = new ArrayList<String>();
     entries.add("foo");
     graph.addEdge(1, "bar", "foo");
+    System.out.println("get neighbors: " + graph.getNeighbors("foo"));
     printAllInfo("shouldReturnnAnOrphanWhenEntryPointIsDestNotSource");
 
-    for (String entry : entries) {
-      if (graph.outDegree(entry) == 0) {
-        System.out.println("Entry point " + entry + " has no edges\n");
-      }
-    }
-
-    // assertThat(testee.findsDeadMethods(graph, entries)).containsOnly("bar");
-
-    assertThat(testee.findsDeadMethods(graph, entries)).isNotEmpty();
-
+    assertThat(testee.findsDeadMethods(graph, entries)).containsOnly("bar");
   }
 
   private void printAllInfo(String testName) {
@@ -134,7 +133,7 @@ public class OrphanAnalyserTest<V, E> {
     // System.out.println("\n*Graph empty or no entry points detected*");
     // }
     System.out.println("\n" + "method returns: "
-        + testee.findsDeadMethods(graph, entries) + "---");
+        + testee.findsDeadMethods(graph, entries) + "\n---");
   }
 
   private void printBooleanResults() {
