@@ -128,6 +128,33 @@ public class OrphanAnalyserTest<V, E> {
     assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
   }
 
+  @Test
+  public void shouldReturnnNoOrphansWhenAll2ConnectedToAnEntryPoint() {
+    testee = new OrphanAnalyser<String, Integer>();
+    graph = new DirectedSparseGraph<String, Integer>();
+    entries = new ArrayList<String>();
+    entries.add("foo");
+    graph.addEdge(1, "foo", "bar");
+    graph.addEdge(2, "bar", "moo");
+    // System.out.println("get neighbors: " + graph.getNeighbors("foo"));
+    // printAllInfo("shouldReturnnAnOrphanWhenEntryPointIsDestNotSource");
+    assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
+  }
+
+  @Test
+  public void shouldReturnnNoOrphansWhenAll3ConnectedToAnEntryPoint() {
+    testee = new OrphanAnalyser<String, Integer>();
+    graph = new DirectedSparseGraph<String, Integer>();
+    entries = new ArrayList<String>();
+    entries.add("foo");
+    graph.addEdge(1, "foo", "bar");
+    graph.addEdge(2, "bar", "moo");
+    graph.addEdge(3, "bar", "koo");
+    System.out.println("get neighbors: " + graph.getNeighbors("foo"));
+    printAllInfo("shouldReturnnAnOrphanWhenEntryPointIsDestNotSource");
+    assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
+  }
+
   private void printAllInfo(String testName) {
     System.out.println("\n" + testName);
     printBooleanResults();
