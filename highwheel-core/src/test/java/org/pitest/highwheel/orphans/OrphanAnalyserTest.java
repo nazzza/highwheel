@@ -92,12 +92,14 @@ public class OrphanAnalyserTest<V, E> {
     graph.addEdge(2, "foo", "kro");
     graph.addEdge(3, "foo", "car");
     graph.addEdge(4, "moo", "foo");
-    System.out.println("edges for foo: " + graph.getIncidentEdges("foo"));
-    System.out.println("get neighbors for foo: " + graph.getNeighbors("foo"));
-    System.out
-        .println("getPredecessors for foo: " + graph.getPredecessors("foo"));
-    System.out.println("getSuccessors for foo: " + graph.getSuccessors("foo"));
-    printAllInfo("shouldReturnNoOrphansWhenAllAreConnectedToAnEntryPoint");
+    // System.out.println("edges for foo: " + graph.getIncidentEdges("foo"));
+    // System.out.println("get neighbors for foo: " +
+    // graph.getNeighbors("foo"));
+    // System.out
+    // .println("getPredecessors for foo: " + graph.getPredecessors("foo"));
+    // System.out.println("getSuccessors for foo: " +
+    // graph.getSuccessors("foo"));
+    // printAllInfo("shouldReturnNoOrphansWhenAllAreConnectedToAnEntryPoint");
     assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
   }
 
@@ -108,10 +110,22 @@ public class OrphanAnalyserTest<V, E> {
     entries = new ArrayList<String>();
     entries.add("foo");
     graph.addEdge(1, "bar", "foo");
-    System.out.println("get neighbors: " + graph.getNeighbors("foo"));
-    printAllInfo("shouldReturnnAnOrphanWhenEntryPointIsDestNotSource");
-
+    // System.out.println("get neighbors: " + graph.getNeighbors("foo"));
+    // printAllInfo("shouldReturnnAnOrphanWhenEntryPointIsDestNotSource");
     assertThat(testee.findsDeadMethods(graph, entries)).containsOnly("bar");
+  }
+
+  @Test
+  public void shouldReturnnNoOrphansWhenEAllEntryPointsNoMatterEdge() {
+    testee = new OrphanAnalyser<String, Integer>();
+    graph = new DirectedSparseGraph<String, Integer>();
+    entries = new ArrayList<String>();
+    entries.add("foo");
+    entries.add("bar");
+    graph.addEdge(1, "bar", "foo");
+    // System.out.println("get neighbors: " + graph.getNeighbors("foo"));
+    // printAllInfo("shouldReturnnAnOrphanWhenEntryPointIsDestNotSource");
+    assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
   }
 
   private void printAllInfo(String testName) {
