@@ -26,7 +26,7 @@ public class OrphanAnalyserTest<V, E> {
     testee = new OrphanAnalyser<String, Integer>();
     graph = new DirectedSparseGraph<String, Integer>();
     entries = Collections.emptyList();
-    // printAllInfo("1 shouldReturnNoOrphansWhenGraphEmpty");
+    // printAllInfo("shouldReturnNoOrphansWhenGraphEmpty");
     assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
   }
 
@@ -36,7 +36,7 @@ public class OrphanAnalyserTest<V, E> {
     graph = new DirectedSparseGraph<String, Integer>();
     entries = Collections.emptyList();
     graph.addVertex("foo");
-    // printAllInfo("2 shouldReturnAllOrphansWhenNoEntryPoints");
+    // printAllInfo("shouldReturnAllOrphansWhenNoEntryPoints");
     assertThat(testee.findsDeadMethods(graph, entries))
         .containsAll(graph.getVertices());
   }
@@ -54,7 +54,7 @@ public class OrphanAnalyserTest<V, E> {
   // entries = new ArrayList<String>();
   // entries.add("boo");
   // graph.addVertex("foo");
-  // printAllInfo("3 shouldReturnAllOrphansWhenEntryPointsNotInsideGraph");
+  // printAllInfo("shouldReturnAllOrphansWhenEntryPointsNotInsideGraph");
   // assertThat(testee.findsDeadMethods(graph, entries))
   // .containsAll(graph.getVertices());
   // }
@@ -65,7 +65,7 @@ public class OrphanAnalyserTest<V, E> {
   // graph = new DirectedSparseGraph<String, Integer>();
   // entries = Collections.emptyList(); // no entry points detected
   // graph.addVertex("foo");
-  // printAllInfo("3 shouldReturnAnOrphanWhenMethodHasNoDependencies");
+  // printAllInfo("shouldReturnAnOrphanWhenMethodHasNoDependencies");
   // assertThat(testee.findsDeadMethods(graph, entries)).containsOnly("foo");
   // }
 
@@ -78,7 +78,7 @@ public class OrphanAnalyserTest<V, E> {
     entries.add("bar");
     graph.addVertex("foo");
     graph.addVertex("bar");
-    // printAllInfo("4 shouldReturnNoOrphansWhenAllAreEntryPoints");
+    // printAllInfo("shouldReturnNoOrphansWhenAllAreEntryPoints");
     assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
   }
 
@@ -89,8 +89,8 @@ public class OrphanAnalyserTest<V, E> {
     entries = new ArrayList<String>();
     entries.add("foo");
     graph.addEdge(1, "foo", "bar");
-    System.out.println("get neighbors: " + graph.getNeighbors("foo"));
-    printAllInfo("5 shouldReturnNoOrphansWhenAllAreConnectedToAnEntryPoint");
+    // System.out.println("get neighbors: " + graph.getNeighbors("foo"));
+    // printAllInfo("shouldReturnNoOrphansWhenAllAreConnectedToAnEntryPoint");
     assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
   }
 
@@ -101,7 +101,7 @@ public class OrphanAnalyserTest<V, E> {
     entries = new ArrayList<String>();
     entries.add("foo");
     graph.addEdge(1, "bar", "foo");
-    printAllInfo("6 shouldReturnnAnOrphanWhenEntryPointIsDestNotSource");
+    printAllInfo("shouldReturnnAnOrphanWhenEntryPointIsDestNotSource");
 
     for (String entry : entries) {
       if (graph.outDegree(entry) == 0) {
