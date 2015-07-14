@@ -31,6 +31,19 @@ public class OrphanAnalyserTest<V, E> {
   }
 
   @Test
+  public void shouldReturnNoOrphansWhenAllAreEntryPoints() {
+    testee = new OrphanAnalyser<String, Integer>();
+    graph = new DirectedSparseGraph<String, Integer>();
+    entries = new ArrayList<String>();
+    entries.add("foo");
+    entries.add("bar");
+    graph.addVertex("foo");
+    graph.addVertex("bar");
+    // printAllInfo("shouldReturnNoOrphansWhenAllAreEntryPoints");
+    assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
+  }
+
+  @Test
   public void shouldReturnAllOrphansWhenNoEntryPoints() {
     testee = new OrphanAnalyser<String, Integer>();
     graph = new DirectedSparseGraph<String, Integer>();
@@ -58,29 +71,6 @@ public class OrphanAnalyserTest<V, E> {
   // assertThat(testee.findsDeadMethods(graph, entries))
   // .containsAll(graph.getVertices());
   // }
-
-  // @Test
-  // public void shouldReturnAnOrphanWhenMethodHasNoDependencies() {
-  // testee = new OrphanAnalyser<String, Integer>();
-  // graph = new DirectedSparseGraph<String, Integer>();
-  // entries = Collections.emptyList(); // no entry points detected
-  // graph.addVertex("foo");
-  // printAllInfo("shouldReturnAnOrphanWhenMethodHasNoDependencies");
-  // assertThat(testee.findsDeadMethods(graph, entries)).containsOnly("foo");
-  // }
-
-  @Test
-  public void shouldReturnNoOrphansWhenAllAreEntryPoints() {
-    testee = new OrphanAnalyser<String, Integer>();
-    graph = new DirectedSparseGraph<String, Integer>();
-    entries = new ArrayList<String>();
-    entries.add("foo");
-    entries.add("bar");
-    graph.addVertex("foo");
-    graph.addVertex("bar");
-    // printAllInfo("shouldReturnNoOrphansWhenAllAreEntryPoints");
-    assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
-  }
 
   @Test
   public void shouldReturnNoOrphansWhenAllAreConnectedToAnEntryPoint() {
@@ -116,7 +106,7 @@ public class OrphanAnalyserTest<V, E> {
   }
 
   @Test
-  public void shouldReturnnNoOrphansWhenEAllEntryPointsNoMatterEdge() {
+  public void shouldReturnnNoOrphansWhenAllEntryPointsNoMatterEdge() {
     testee = new OrphanAnalyser<String, Integer>();
     graph = new DirectedSparseGraph<String, Integer>();
     entries = new ArrayList<String>();
@@ -150,9 +140,39 @@ public class OrphanAnalyserTest<V, E> {
     graph.addEdge(1, "foo", "bar");
     graph.addEdge(2, "bar", "moo");
     graph.addEdge(3, "bar", "koo");
-    System.out.println("get neighbors: " + graph.getNeighbors("foo"));
-    printAllInfo("shouldReturnnAnOrphanWhenEntryPointIsDestNotSource");
+    // System.out.println("get neighbors: " + graph.getNeighbors("foo"));
+    // printAllInfo("shouldReturnnAnOrphanWhenEntryPointIsDestNotSource");
     assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
+  }
+
+  @Test
+  public void shouldReturnnNoOrphansWhenAll3ConnectedToAnEntryPointInACircle() {
+    testee = new OrphanAnalyser<String, Integer>();
+    graph = new DirectedSparseGraph<String, Integer>();
+    entries = new ArrayList<String>();
+    entries.add("foo");
+    graph.addEdge(1, "bar", "foo");
+    graph.addEdge(2, "foo", "moo");
+    graph.addEdge(3, "bar", "moo");
+    // System.out.println("get neighbors: " + graph.getNeighbors("foo"));
+    // printAllInfo("shouldReturnnAnOrphanWhenEntryPointIsDestNotSource");
+    assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
+  }
+
+  // @Test unsure
+  public void shouldReturnOrphansWhen2EntryPointsConnectedTo1NonEntryPoint() {
+    testee = new OrphanAnalyser<String, Integer>();
+    graph = new DirectedSparseGraph<String, Integer>();
+    entries = new ArrayList<String>();
+    entries.add("foo");
+    entries.add("bar");
+    graph.addEdge(1, "foo", "moo");
+    graph.addEdge(2, "bar", "moo");
+    System.out.println("get neighbors for moo: " + graph.getNeighbors("moo"));
+    System.out.println("entry points: " + entries);
+    printAllInfo(
+        "shouldReturnOrphansWhen2EntryPointsConnectedTo1NonEntryPoint");
+    assertThat(testee.findsDeadMethods(graph, entries)).isNotEmpty();
   }
 
   private void printAllInfo(String testName) {
