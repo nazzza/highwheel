@@ -224,8 +224,6 @@ public class OrphanAnalyserTest<V, E> {
     System.out.println("isEmptyGraph " + testee.isEmptyGraph(graph));
     System.out.println(
         "areThereAnyEntryPoints " + testee.areThereAnyEntryPoints(entries));
-    System.out.println("areEntryPointsInsideAGraph "
-        + testee.areEntryPointsInsideAGraph(graph, entries));
     System.out.println("areAllMethodsEntryPoints "
         + testee.areAllMethodsEntryPoints(graph, entries));
     System.out

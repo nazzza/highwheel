@@ -10,15 +10,14 @@ public class OrphanAnalyser<V, E> {
   public List<V> findsDeadMethods(DirectedGraph<V, E> methodCalls,
       List<V> entryPoints) {
     List<V> orphans = new ArrayList<V>();
-    List<V> nonEntryPoints = new ArrayList<V>();
-    nonEntryPoints.addAll(methodCalls.getVertices());
+    List<V> nonEntryPoints = seperateEntryPointsFromNonEntryPoints(entryPoints,
+        methodCalls);
 
     if (!isEmptyGraph(methodCalls)) {
       if (areThereAnyEntryPoints(entryPoints)) {
         if (areAllMethodsEntryPoints(methodCalls, entryPoints)) {
           return orphans;
         } else {
-          seperateEntryPointsFromNonEntryPoints(entryPoints, nonEntryPoints);
           for (V nonEntryPoint : nonEntryPoints) {
             if (methodCalls.getNeighbors(nonEntryPoint).isEmpty()) {
               // or methodCalls.getIncidentEdges(nonEntryPoint).isEmpty()
@@ -44,77 +43,29 @@ public class OrphanAnalyser<V, E> {
     return orphans;
   }
 
-  public void seperateEntryPointsFromNonEntryPoints(List<V> entryPoints,
-      List<V> nonEntryPoints) {
-    for (V entryPoint : entryPoints) {
-      nonEntryPoints.remove(entryPoint);
-    }
+  List<V> seperateEntryPointsFromNonEntryPoints(List<V> entryPoints,
+      DirectedGraph<V, E> methodCalls) {
+    List<V> nonEntryPoints = new ArrayList<V>();
+    nonEntryPoints.addAll(methodCalls.getVertices());
+    nonEntryPoints.removeAll(entryPoints);
+    return nonEntryPoints;
   }
 
-  public boolean isEmptyGraph(DirectedGraph<V, E> methodCalls) {
+  boolean isEmptyGraph(DirectedGraph<V, E> methodCalls) {
     return methodCalls.getVertexCount() == 0;
   }
 
-  public boolean areAllMethodsEntryPoints(DirectedGraph<V, E> methodCalls,
+  boolean areAllMethodsEntryPoints(DirectedGraph<V, E> methodCalls,
       List<V> entryPoints) {
-    if (methodCalls.getVertexCount() == entryPoints.size()) {
-      return true;
-    }
-    return false;
+    return (methodCalls.getVertexCount() == entryPoints.size());
   }
 
-  public boolean areThereAnyEntryPoints(List<V> entryPoints) {
-    if (!entryPoints.isEmpty()) {
-      return true;
-    }
-    return false;
+  boolean areThereAnyEntryPoints(List<V> entryPoints) {
+    return (!entryPoints.isEmpty());
   }
 
-  public boolean areThereAnyEdges(DirectedGraph<V, E> methodCalls) {
-    if (methodCalls.getEdgeCount() > 0) {
-      return true;
-    }
-    return false;
+  boolean areThereAnyEdges(DirectedGraph<V, E> methodCalls) {
+    return (methodCalls.getEdgeCount() > 0);
   }
-
-  // Are there any elements which are inside entryPoints but not inside a Graph?
-  public boolean areEntryPointsInsideAGraph(DirectedGraph<V, E> methodCalls,
-      List<V> entryPoints) {
-    for (V entryPoint : entryPoints) {
-      if (!methodCalls.containsVertex(entryPoint)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  // private boolean hasEntryPointEdges(DirectedGraph<V, E> methodCalls,
-  // String entryPoint) {
-  // if (methodCalls.degree(entryPoint) > 0) {
-  // return true;
-  // }
-  // return false;
-  //
-  // }
-
-  // if (!isEmptyGraph(methodCalls) && areThereAnyEntryPoints(entryPoints)
-  // && areThereAnyEdges(methodCalls)
-  // && areEntryPointsInsideAGraph(methodCalls, entryPoints)
-  // && !areAllMethodsEntryPoints(methodCalls, entryPoints)) {
-  // // check
-  // }
-  // return orphans;
-  // }
-
-  // && !areAllMethodsEntryPoints(methodCalls, entryPoints)) {
-  // for (V entryPoint : entryPoints) {
-  // methodCalls.
-  // methodCalls.getIncidentVertices(edge)
-  // }
-  // orphans = new ArrayList<String>(
-  // ((Collection<? extends String>) methodCalls.getVertices()));
-  // }
-  //
-  // }
 
 }
