@@ -221,7 +221,6 @@ public class OrphanAnalyserTest<V, E> {
 
   private void printBooleanResults() {
     System.out.println("\nboolean results--->");
-    System.out.println("isEmptyGraph " + testee.isEmptyGraph(graph));
     System.out.println(
         "areThereAnyEntryPoints " + testee.areThereAnyEntryPoints(entries));
     System.out.println("areAllMethodsEntryPoints "

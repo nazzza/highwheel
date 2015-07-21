@@ -13,32 +13,32 @@ public class OrphanAnalyser<V, E> {
     List<V> nonEntryPoints = seperateEntryPointsFromNonEntryPoints(entryPoints,
         methodCalls);
 
-    if (!isEmptyGraph(methodCalls)) {
-      if (areThereAnyEntryPoints(entryPoints)) {
-        if (areAllMethodsEntryPoints(methodCalls, entryPoints)) {
-          return orphans;
+    if (areThereAnyEntryPoints(entryPoints)) {
+      // if (areAllMethodsEntryPoints(methodCalls, entryPoints)) {
+      // return orphans;
+      // }
+      return analyseChain(methodCalls, entryPoints, orphans, nonEntryPoints);
+    }
+    orphans.addAll(methodCalls.getVertices());
+    return orphans;
+  }
+
+  private List<V> analyseChain(DirectedGraph<V, E> methodCalls,
+      List<V> entryPoints, List<V> orphans, List<V> nonEntryPoints) {
+    for (V nonEntryPoint : nonEntryPoints) {
+      if (methodCalls.getNeighbors(nonEntryPoint).isEmpty()) {
+        orphans.add(nonEntryPoint);
+      } else {
+        if (methodCalls.getPredecessors(nonEntryPoint).isEmpty()) {
+          orphans.add(nonEntryPoint);
         } else {
-          for (V nonEntryPoint : nonEntryPoints) {
-            if (methodCalls.getNeighbors(nonEntryPoint).isEmpty()) {
-              // or methodCalls.getIncidentEdges(nonEntryPoint).isEmpty()
-              orphans.add(nonEntryPoint);
-            } else {
-              if (methodCalls.getPredecessors(nonEntryPoint).isEmpty()) {
-                orphans.add(nonEntryPoint);
-              } else {
-                for (V predecessor : methodCalls
-                    .getPredecessors(nonEntryPoint)) {
-                  if (entryPoints.contains(predecessor)) {
-                    return orphans;
-                  }
-                }
-              }
+          for (V predecessor : methodCalls.getPredecessors(nonEntryPoint)) {
+            if (entryPoints.contains(predecessor)) {
+              return orphans;
             }
           }
-          return orphans;
         }
       }
-      orphans.addAll(methodCalls.getVertices());
     }
     return orphans;
   }
@@ -49,10 +49,6 @@ public class OrphanAnalyser<V, E> {
     nonEntryPoints.addAll(methodCalls.getVertices());
     nonEntryPoints.removeAll(entryPoints);
     return nonEntryPoints;
-  }
-
-  boolean isEmptyGraph(DirectedGraph<V, E> methodCalls) {
-    return methodCalls.getVertexCount() == 0;
   }
 
   boolean areAllMethodsEntryPoints(DirectedGraph<V, E> methodCalls,
