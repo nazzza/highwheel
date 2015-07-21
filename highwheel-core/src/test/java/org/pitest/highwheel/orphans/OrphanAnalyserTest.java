@@ -35,6 +35,7 @@ public class OrphanAnalyserTest<V, E> {
     entries.add("foo");
     entries.add("bar");
     graph.addVertex("foo");
+    graph.addVertex("bar");
     assertThat(testee.findOrphans(graph, entries)).isEmpty();
   }
 
