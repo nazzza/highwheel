@@ -52,10 +52,7 @@ public class OrphanAnalyser<V, E> {
   }
 
   public boolean isEmptyGraph(DirectedGraph<V, E> methodCalls) {
-    if (methodCalls.getVertexCount() == 0) {
-      return true;
-    }
-    return false;
+    return methodCalls.getVertexCount() == 0;
   }
 
   public boolean areAllMethodsEntryPoints(DirectedGraph<V, E> methodCalls,

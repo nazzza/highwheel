@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -159,7 +160,8 @@ public class OrphanAnalyserTest<V, E> {
     assertThat(testee.findsDeadMethods(graph, entries)).isEmpty();
   }
 
-  // @Test unsure
+  @Ignore
+  @Test
   public void shouldReturnOrphansWhen2EntryPointsConnectedTo1NonEntryPoint() {
     testee = new OrphanAnalyser<String, Integer>();
     graph = new DirectedSparseGraph<String, Integer>();
@@ -168,11 +170,31 @@ public class OrphanAnalyserTest<V, E> {
     entries.add("bar");
     graph.addEdge(1, "foo", "moo");
     graph.addEdge(2, "bar", "moo");
-    System.out.println("get neighbors for moo: " + graph.getNeighbors("moo"));
-    System.out.println("entry points: " + entries);
+    // System.out.println("get neighbors for moo: " +
+    // graph.getNeighbors("moo"));
+    // System.out.println("entry points: " + entries);
     printAllInfo(
         "shouldReturnOrphansWhen2EntryPointsConnectedTo1NonEntryPoint");
     assertThat(testee.findsDeadMethods(graph, entries)).isNotEmpty();
+  }
+
+  @Ignore
+  @Test
+  public void shouldReturnOrphansWhenOrphanGroupPresent() {
+    testee = new OrphanAnalyser<String, Integer>();
+    graph = new DirectedSparseGraph<String, Integer>();
+    entries = new ArrayList<String>();
+    entries.add("foo");
+    graph.addEdge(1, "foo", "bar");
+    graph.addEdge(2, "bar", "moo");
+    graph.addEdge(3, "bar", "koo");
+    //
+    graph.addEdge(4, "boo", "loo");
+    graph.addEdge(5, "loo", "car");
+    graph.addEdge(6, "loo", "mar");
+    // System.out.println(testee.findsDeadMethods(graph, entries));
+    assertThat(testee.findsDeadMethods(graph, entries)).containsOnly("boo",
+        "loo", "car", "mar");
   }
 
   private void printAllInfo(String testName) {
