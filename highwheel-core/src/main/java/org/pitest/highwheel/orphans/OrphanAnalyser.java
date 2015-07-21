@@ -7,7 +7,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 
 public class OrphanAnalyser<V, E> {
 
-  public List<V> findsDeadMethods(DirectedGraph<V, E> methodCalls,
+  public List<V> findOrphans(DirectedGraph<V, E> methodCalls,
       List<V> entryPoints) {
     List<V> orphans = new ArrayList<V>();
     List<V> nonEntryPoints = seperateEntryPointsFromNonEntryPoints(entryPoints,
@@ -19,18 +19,12 @@ public class OrphanAnalyser<V, E> {
   private List<V> analyseChain(DirectedGraph<V, E> methodCalls,
       List<V> entryPoints, List<V> orphans, List<V> nonEntryPoints) {
     for (V nonEntryPoint : nonEntryPoints) {
-      if (methodCalls.getNeighbors(nonEntryPoint).isEmpty()) {
+      if (methodCalls.getPredecessors(nonEntryPoint).isEmpty()) {
         orphans.add(nonEntryPoint);
       } else {
-        if (methodCalls.getPredecessors(nonEntryPoint).isEmpty()) {
-          orphans.add(nonEntryPoint);
-        } else {
-          for (V predecessor : methodCalls.getPredecessors(nonEntryPoint)) {
-            if (entryPoints.contains(predecessor)) {
-              return orphans;
-            }
-          }
-        }
+        // if (entryPoints.contains(methodCalls.getPredecessors(nonEntryPoint)))
+        // ;
+        return orphans;
       }
     }
     return orphans;
