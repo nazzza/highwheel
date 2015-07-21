@@ -55,24 +55,6 @@ public class OrphanAnalyserTest<V, E> {
         .containsAll(graph.getVertices());
   }
 
-  // @Test
-  // To be modified: possibilities:
-  // 1. Go through the list of entry points, get rid of those that can't be
-  // found in the graph
-  // 2. Throw error - not sensible, will stop the workflow?
-  // 3. Deal with this when analysing data, when collecting entry points
-  // This test is temporary, just to make sure we though about it
-  // public void shouldRx1eturnAllOrphansWhenEntryPointsNotInsideGraph() {
-  // testee = new OrphanAnalyser<String, Integer>();
-  // graph = new DirectedSparseGraph<String, Integer>();
-  // entries = new ArrayList<String>();
-  // entries.add("boo");
-  // graph.addVertex("foo");
-  // printAllInfo("shouldReturnAllOrphansWhenEntryPointsNotInsideGraph");
-  // assertThat(testee.findsDeadMethods(graph, entries))
-  // .containsAll(graph.getVertices());
-  // }
-
   @Test
   public void shouldReturnNoOrphansWhenAllAreConnectedToAnEntryPoint() {
     testee = new OrphanAnalyser<String, Integer>();
@@ -221,12 +203,12 @@ public class OrphanAnalyserTest<V, E> {
 
   private void printBooleanResults() {
     System.out.println("\nboolean results--->");
-    System.out.println(
-        "areThereAnyEntryPoints " + testee.areThereAnyEntryPoints(entries));
-    System.out.println("areAllMethodsEntryPoints "
-        + testee.areAllMethodsEntryPoints(graph, entries));
-    System.out
-        .println("areThereAnyEdges " + testee.areThereAnyEdges(graph) + "\n");
+    // System.out.println(
+    // "areThereAnyEntryPoints " + testee.areThereAnyEntryPoints(entries));
+    // System.out.println("areAllMethodsEntryPoints "
+    // + testee.areAllMethodsEntryPoints(graph, entries));
+    // System.out
+    // .println("areThereAnyEdges " + testee.areThereAnyEdges(graph) + "\n");
   }
 
 }

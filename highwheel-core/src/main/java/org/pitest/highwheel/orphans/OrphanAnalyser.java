@@ -13,14 +13,7 @@ public class OrphanAnalyser<V, E> {
     List<V> nonEntryPoints = seperateEntryPointsFromNonEntryPoints(entryPoints,
         methodCalls);
 
-    if (areThereAnyEntryPoints(entryPoints)) {
-      // if (areAllMethodsEntryPoints(methodCalls, entryPoints)) {
-      // return orphans;
-      // }
-      return analyseChain(methodCalls, entryPoints, orphans, nonEntryPoints);
-    }
-    orphans.addAll(methodCalls.getVertices());
-    return orphans;
+    return analyseChain(methodCalls, entryPoints, orphans, nonEntryPoints);
   }
 
   private List<V> analyseChain(DirectedGraph<V, E> methodCalls,
@@ -49,19 +42,6 @@ public class OrphanAnalyser<V, E> {
     nonEntryPoints.addAll(methodCalls.getVertices());
     nonEntryPoints.removeAll(entryPoints);
     return nonEntryPoints;
-  }
-
-  boolean areAllMethodsEntryPoints(DirectedGraph<V, E> methodCalls,
-      List<V> entryPoints) {
-    return (methodCalls.getVertexCount() == entryPoints.size());
-  }
-
-  boolean areThereAnyEntryPoints(List<V> entryPoints) {
-    return (!entryPoints.isEmpty());
-  }
-
-  boolean areThereAnyEdges(DirectedGraph<V, E> methodCalls) {
-    return (methodCalls.getEdgeCount() > 0);
   }
 
 }
