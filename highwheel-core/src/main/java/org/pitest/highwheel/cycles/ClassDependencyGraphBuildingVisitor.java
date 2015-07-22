@@ -24,8 +24,7 @@ public class ClassDependencyGraphBuildingVisitor implements AccessVisitor {
     final ElementName destClass = dest.getElementName();
 
     if (!sourceClass.equals(destClass)) {
-
-      Dependency edge = this.g.findEdge(sourceClass, sourceClass);
+      Dependency edge = this.g.findEdge(sourceClass, destClass);
       if (edge == null) {
         edge = new Dependency();
         this.g.addEdge(edge, sourceClass, destClass);
@@ -42,7 +41,6 @@ public class ClassDependencyGraphBuildingVisitor implements AccessVisitor {
 
   public void newNode(final ElementName clazz) {
     this.g.addVertex(clazz);
-
   }
 
   public void newEntryPoint(final ElementName clazz) {
