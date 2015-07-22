@@ -36,6 +36,23 @@ public class OrphanAnalyserTest<V, E> {
   }
 
   @Test
+  public void shouldReturnAllOrphansWhen2OrphanGroups() {
+    testee = new OrphanAnalyser<String, Integer>();
+    graph = fillGraph("foo->bar", "loo->poo");
+    entries = fillEntries();
+    assertThat(testee.findOrphans(graph, entries)).contains("foo", "bar", "loo",
+        "poo");
+  }
+
+  @Test
+  public void shouldReturnAllOrphansWhenNoEdgesNoEntryPoints() {
+    testee = new OrphanAnalyser<String, Integer>();
+    graph = fillGraph("foo", "bar");
+    entries = fillEntries();
+    assertThat(testee.findOrphans(graph, entries)).contains("foo", "bar");
+  }
+
+  @Test
   public void shouldReturnAllOrphansWhenNoEntryPoints() {
     testee = new OrphanAnalyser<String, Integer>();
     graph = fillGraph("foo->bar");
@@ -115,18 +132,22 @@ public class OrphanAnalyserTest<V, E> {
 
     for (String line : s) {
 
-      List<String> nodes = Arrays.asList(line.split("->"));
+      if (line.contains("->")) {
+        List<String> nodes = Arrays.asList(line.split("->"));
 
-      String firstNode = nodes.get(0);
+        String firstNode = nodes.get(0);
 
-      int edge = graph.getEdgeCount();
-      graph.addEdge(edge, firstNode, nodes.get(1));
+        int edge = graph.getEdgeCount();
 
-      for (int i = 1; i < nodes.size() - 1;) {
-        graph.addEdge(++edge, nodes.get(i), nodes.get(++i));
+        graph.addEdge(edge, firstNode, nodes.get(1));
+
+        for (int i = 1; i < nodes.size() - 1;) {
+          graph.addEdge(++edge, nodes.get(i), nodes.get(++i));
+        }
+      } else {
+        graph.addVertex(line);
       }
     }
-
     return graph;
   }
 
