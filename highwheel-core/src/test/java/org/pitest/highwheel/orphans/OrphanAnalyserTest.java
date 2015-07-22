@@ -130,12 +130,9 @@ public class OrphanAnalyserTest<V, E> {
 
   DirectedGraph<String, Integer> graphOf(String... s) {
     graph = new DirectedSparseGraph<String, Integer>();
-
     for (String line : s) {
-
       if (line.contains("->")) {
         List<String> nodes = Arrays.asList(line.split("->"));
-
         findEdges(nodes);
       } else {
         graph.addVertex(line);
@@ -146,11 +143,8 @@ public class OrphanAnalyserTest<V, E> {
 
   void findEdges(List<String> nodes) {
     String firstNode = nodes.get(0);
-
     int edge = graph.getEdgeCount();
-
     graph.addEdge(edge, firstNode, nodes.get(1));
-
     for (int i = 1; i < nodes.size() - 1;) {
       graph.addEdge(++edge, nodes.get(i), nodes.get(++i));
     }
@@ -159,29 +153,5 @@ public class OrphanAnalyserTest<V, E> {
   List<String> entries(String... e) {
     return Arrays.asList(e);
   }
-
-  // DirectedGraph<String, Integer> fillGraphBetter(String... s) {
-  // graph = new DirectedSparseGraph<String, Integer>();
-  //
-  // for (String line : s) {
-  //
-  // if (line.contains("->")) {
-  // List<String> nodes = Arrays.asList(line.split("->"));
-  //
-  // String firstNode = nodes.get(0);
-  //
-  // int edge = graph.getEdgeCount();
-  //
-  // graph.addEdge(edge, firstNode, nodes.get(1));
-  //
-  // for (int i = 1; i < nodes.size() - 1;) {
-  // graph.addEdge(++edge, nodes.get(i), nodes.get(++i));
-  // }
-  // } else {
-  // graph.addVertex(line);
-  // }
-  // }
-  // return graph;
-  // }
 
 }
