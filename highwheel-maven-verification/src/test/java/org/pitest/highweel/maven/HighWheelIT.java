@@ -29,11 +29,8 @@ public class HighWheelIT {
 
   @Rule
   public TemporaryFolder testFolder = new TemporaryFolderWithOptions(false);
-<<<<<<< HEAD
 
   private Verifier verifier;
-=======
->>>>>>> upstream/master
 
   @Test
   public void shouldProduceAnIndexFile() throws Exception {
