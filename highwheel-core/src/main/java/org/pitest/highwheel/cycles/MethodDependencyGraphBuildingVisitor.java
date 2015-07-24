@@ -1,48 +1,42 @@
 package org.pitest.highwheel.cycles;
 
+import static org.pitest.highwheel.model.AccessType.USES;
+
 import org.pitest.highwheel.classpath.AccessVisitor;
 import org.pitest.highwheel.model.AccessPoint;
 import org.pitest.highwheel.model.AccessType;
-import org.pitest.highwheel.model.Dependency;
 import org.pitest.highwheel.model.ElementName;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 
 public class MethodDependencyGraphBuildingVisitor implements AccessVisitor {
 
-  private final DirectedGraph<ElementName, Dependency> g;
-
+  private final DirectedGraph<AccessPoint, Integer> g;
 
   public MethodDependencyGraphBuildingVisitor(
-      final DirectedGraph<ElementName, Dependency> g) {
+      final DirectedGraph<AccessPoint, Integer> g) {
     this.g = g;
   }
 
+  @Override
   public void apply(final AccessPoint source, final AccessPoint dest,
       final AccessType type) {
-    final ElementName sourceMethod = source.getElementName();
-    final ElementName destMethod = dest.getElementName();
-
-    if (!sourceMethod.equals(destMethod)) {
-      Dependency edge = this.g.findEdge(sourceMethod, destMethod);
-      if (edge == null) {
-        edge = new Dependency();
-        this.g.addEdge(edge, sourceMethod, destMethod);
-      }
-      edge.addDependency(source, dest, type);
+    if (type.equals(USES)) {
+      int edge = g.getEdgeCount() + 1;
+      this.g.addEdge(edge, source, dest);
     }
-
-    // update edge here
   }
 
-  public DirectedGraph<ElementName, Dependency> getGraph() {
+  public DirectedGraph<AccessPoint, Integer> getGraph() {
     return this.g;
   }
 
+  @Override
   public void newNode(final ElementName clazz) {
-    this.g.addVertex(clazz);
+    // this.g.addVertex(clazz);
   }
 
+  @Override
   public void newEntryPoint(final ElementName clazz) {
 
   }
