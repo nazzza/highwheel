@@ -9,9 +9,11 @@ import org.pitest.highwheel.cycles.ClassDependencyGraphBuildingVisitor;
 import org.pitest.highwheel.cycles.CodeGraphs;
 import org.pitest.highwheel.cycles.CycleAnalyser;
 import org.pitest.highwheel.cycles.CycleReporter;
+import org.pitest.highwheel.cycles.MethodDependencyGraphBuildingVisitor;
 import org.pitest.highwheel.losttests.LostTestAnalyser;
 import org.pitest.highwheel.losttests.LostTestHTMLVisitor;
 import org.pitest.highwheel.losttests.LostTestVisitor;
+import org.pitest.highwheel.model.AccessPoint;
 import org.pitest.highwheel.model.Dependency;
 import org.pitest.highwheel.model.ElementName;
 import org.pitest.highwheel.oracle.DependencyOracle;
@@ -34,24 +36,29 @@ public class Highwheel {
     this.parser = parser;
   }
 
-  public void analyse(final ClasspathRoot mainRoot, final ClasspathRoot testRoot)
-      throws IOException {
+  public void analyse(final ClasspathRoot mainRoot,
+      final ClasspathRoot testRoot) throws IOException {
 
     final DirectedGraph<ElementName, Dependency> classGraph = new DirectedSparseGraph<ElementName, Dependency>();
+    final DirectedGraph<AccessPoint, Integer> methodGraph = new DirectedSparseGraph<AccessPoint, Integer>();
 
     final AccessVisitor v = new ClassDependencyGraphBuildingVisitor(classGraph);
+
+    final AccessVisitor mv = new MethodDependencyGraphBuildingVisitor(
+        methodGraph);
 
     this.parser.parse(mainRoot, v);
 
     final CodeGraphs g = new CodeGraphs(classGraph);
     final CycleAnalyser cycleAnalyser = new CycleAnalyser();
-    final CycleReporter r = new HtmlCycleWriter(this.dependencyOracle, this.fsf);
+    final CycleReporter r = new HtmlCycleWriter(this.dependencyOracle,
+        this.fsf);
     cycleAnalyser.analyse(g, r);
 
     if (testRoot != null) {
       LostTestVisitor visitor = new LostTestHTMLVisitor(this.fsf);
       final LostTestAnalyser lostTestAnalyser = new LostTestAnalyser();
-      lostTestAnalyser.analyse(mainRoot, testRoot,visitor);
+      lostTestAnalyser.analyse(mainRoot, testRoot, visitor);
     }
   }
 

@@ -48,22 +48,6 @@ class DependencyClassVisitor extends ClassVisitor {
     this.entryPointRecogniser = entryPointRecogniser;
   }
 
-  // private static EntryPointRecogniserTool recogniseEntryPoints() {
-  // return new EntryPointRecogniserTool() {
-  //
-  // @Override
-  // public boolean isEntryPoint(int access, String name, String desc) {
-  // return isStatic(access) && name.equals("main")
-  // && desc.equals("([Ljava/lang/String;)V");
-  // }
-  //
-  // private boolean isStatic(int access) {
-  // return (Opcodes.ACC_STATIC & access) != 0;
-  // }
-  //
-  // };
-  // }
-
   private static AccessVisitor filterOutJavaLangObject(
       final AccessVisitor child) {
     return new AccessVisitor() {
@@ -229,15 +213,6 @@ class DependencyClassVisitor extends ClassVisitor {
 
   private boolean parentIsMethod() {
     return this.parent.getAttribute() != null;
-  }
-
-  public boolean isEntryPoint(int access, String name, String desc) {
-    return isStatic(access) && name.equals("main")
-        && desc.equals("([Ljava/lang/String;)V");
-  }
-
-  private boolean isStatic(int access) {
-    return (Opcodes.ACC_STATIC & access) != 0;
   }
 
 }
