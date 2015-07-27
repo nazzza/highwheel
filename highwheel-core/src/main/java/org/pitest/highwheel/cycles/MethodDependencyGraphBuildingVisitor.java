@@ -33,12 +33,17 @@ public class MethodDependencyGraphBuildingVisitor implements AccessVisitor {
 
   @Override
   public void newNode(final ElementName clazz) {
-    // this.g.addVertex(clazz);
+
   }
 
   @Override
-  public void newEntryPoint(final ElementName clazz) {
+  public void newEntryPoint(final AccessPoint ap) {
 
+  }
+
+  @Override
+  public void newAccessPoint(AccessPoint ap) {
+    this.g.addVertex(ap);
   }
 
 }

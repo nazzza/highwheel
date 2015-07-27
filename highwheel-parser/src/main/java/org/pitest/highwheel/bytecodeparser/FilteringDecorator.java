@@ -7,8 +7,7 @@ import org.pitest.highwheel.model.AccessType;
 import org.pitest.highwheel.model.ElementName;
 
 /**
- * Passes calls through to wrapped child only if
- * they match the supplied filter
+ * Passes calls through to wrapped child only if they match the supplied filter
  */
 class FilteringDecorator implements AccessVisitor {
 
@@ -23,7 +22,8 @@ class FilteringDecorator implements AccessVisitor {
   @Override
   public void apply(final AccessPoint source, final AccessPoint dest,
       final AccessType type) {
-    if (this.filter.include(dest.getElementName()) && this.filter.include(source.getElementName())) {
+    if (this.filter.include(dest.getElementName())
+        && this.filter.include(source.getElementName())) {
       this.child.apply(source, dest, type);
     }
   }
@@ -36,9 +36,9 @@ class FilteringDecorator implements AccessVisitor {
   }
 
   @Override
-  public void newEntryPoint(ElementName clazz) {
-    if (this.filter.include(clazz)) {
-      this.child.newEntryPoint(clazz);
+  public void newEntryPoint(AccessPoint ap) {
+    if (this.filter.include(ap.getElementName())) {
+      this.child.newEntryPoint(ap);
     }
   }
 

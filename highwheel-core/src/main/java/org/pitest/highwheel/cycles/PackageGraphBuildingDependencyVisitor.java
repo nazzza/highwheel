@@ -42,7 +42,7 @@ class PackageGraphBuildingDependencyVisitor implements AccessVisitor {
   }
 
   @Override
-  public void newEntryPoint(final ElementName clazz) {
+  public void newEntryPoint(final AccessPoint ap) {
 
   }
 

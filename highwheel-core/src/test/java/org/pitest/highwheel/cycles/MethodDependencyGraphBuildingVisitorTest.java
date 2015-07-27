@@ -52,6 +52,12 @@ public class MethodDependencyGraphBuildingVisitorTest {
     assertThat(testee.getGraph().getVertices()).isNotEmpty();
   }
 
+  @Test
+  public void shouldCreateNewAccessPoint() {
+    testee.newAccessPoint(access("foo", accessPoint("a")));
+    assertThat(testee.getGraph().getVertices()).isNotEmpty();
+  }
+
   private AccessPoint access(String element, final AccessPointName point) {
     return access(element(element), point);
   }

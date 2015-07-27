@@ -13,6 +13,6 @@ public interface AccessVisitor {
   
   void newAccessPoint(AccessPoint ap);
 
-  void newEntryPoint(ElementName clazz);
+  void newEntryPoint(AccessPoint ap);
 
 }
