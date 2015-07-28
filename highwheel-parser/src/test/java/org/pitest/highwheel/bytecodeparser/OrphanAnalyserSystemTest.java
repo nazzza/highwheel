@@ -173,10 +173,6 @@ public class OrphanAnalyserSystemTest {
     }
   }
 
-  private AccessPoint accessAType(final Class<?> type) {
-    return AccessPoint.create(ElementName.fromClass(type));
-  }
-
   private AccessPoint access(final Class<?> type,
       final AccessPointName method) {
     return AccessPoint.create(ElementName.fromClass(type), method);
@@ -185,10 +181,6 @@ public class OrphanAnalyserSystemTest {
   private AccessPointName methodWithParameter(String name, Class<?> paramType) {
     return AccessPointName.create(name,
         Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(paramType)));
-  }
-
-  private AccessPointName method(String name, String desc) {
-    return AccessPointName.create(name, desc);
   }
 
   private AccessPointName method(String name, Class<?> retType) {
