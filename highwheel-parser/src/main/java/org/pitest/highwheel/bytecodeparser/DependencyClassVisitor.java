@@ -156,7 +156,6 @@ class DependencyClassVisitor extends ClassVisitor {
     examineExceptions(exceptions, method);
     examineReturnType(desc, method);
 
-    // change this
     if (entryPointRecogniser.isEntryPoint(access, name, desc)) {
       this.dependencyVisitor.newEntryPoint(method);
     }

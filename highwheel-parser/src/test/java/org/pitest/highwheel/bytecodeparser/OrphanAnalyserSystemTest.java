@@ -1,19 +1,24 @@
 package org.pitest.highwheel.bytecodeparser;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.objectweb.asm.Type;
 import org.pitest.highwheel.bytecodeparser.classpath.ClassLoaderClassPathRoot;
 import org.pitest.highwheel.classpath.ClasspathRoot;
+import org.pitest.highwheel.cycles.EntryPointRecogniserTool;
 import org.pitest.highwheel.cycles.Filter;
 import org.pitest.highwheel.cycles.MethodDependencyGraphBuildingVisitor;
 import org.pitest.highwheel.model.AccessPoint;
@@ -42,6 +47,9 @@ public class OrphanAnalyserSystemTest {
     MockitoAnnotations.initMocks(this);
   }
 
+  @Mock
+  private EntryPointRecogniserTool eprt;
+
   @Test
   public void shouldReturnEmptyGraphWhenNoClass() {
     parseClassPath();
@@ -51,49 +59,63 @@ public class OrphanAnalyserSystemTest {
   @Test
   public void shouldReturnUncalledMethodWhenSingleClass() {
     parseClassPath(Foo.class);
-    List<AccessPoint> ep = new ArrayList<AccessPoint>();
-    assertThat(testee.findOrphans(mdgbv.getGraph(), ep))
+    assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
         .contains(access(Foo.class, method("aMethod", Object.class)));
-  }
-
-  @Test
-  public void shouldNotReturnUncalledMethodWhenSingleClassWithEntryPoint() {
-    parseClassPath(Foo.class);
-    List<AccessPoint> ep = new ArrayList<AccessPoint>();
-    ep.add(access(Foo.class, method("aMethod", Object.class)));
-    assertThat(testee.findOrphans(mdgbv.getGraph(), ep))
-        .doesNotContain(access(Foo.class, method("aMethod", Object.class)));
   }
 
   @Test
   public void shouldReturnNoMethodsWhenClassEmpty() {
     parseClassPath(Unconnected.class);
-    List<AccessPoint> ep = new ArrayList<AccessPoint>();
-    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).hasSize(1);
+    assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
+        .hasSize(1);
   }
 
   @Test
   public void shouldReturnUnconnectedMethodsWhenClasessWithNoEntryPoint() {
     parseClassPath(Foo.class, HasFooAsParameter.class);
-    List<AccessPoint> ep = new ArrayList<AccessPoint>();
-    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).contains(
-        access(HasFooAsParameter.class, methodWithParameter("foo", Foo.class)),
-        access(Foo.class, method("aMethod", Object.class)));
+    assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
+        .contains(
+            access(HasFooAsParameter.class,
+                methodWithParameter("foo", Foo.class)),
+            access(Foo.class, method("aMethod", Object.class)));
+  }
+
+  @Test
+  public void shouldReturnNoUncalledMethodWhenSingleClassWithEntryPoint() {
+    parseClassPath(Foo.class);
+    mdgbv.newEntryPoint(access(Foo.class, method("aMethod", Object.class)));
+    assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
+        .doesNotContain(access(Foo.class, method("aMethod", Object.class)));
   }
 
   @Test
   public void shouldNotReturnUnconnectedMethodsWhenClasessWithEntryPoint() {
     parseClassPath(Foo.class, CallsFooMethod.class);
-    List<AccessPoint> ep = new ArrayList<AccessPoint>();
-    ep.add(access(CallsFooMethod.class, method("foo", Object.class)));
-    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).hasSize(2);
+    mdgbv.newEntryPoint(
+        access(CallsFooMethod.class, method("foo", Object.class)));
+    assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
+        .hasSize(2);
   }
 
   @Test
   public void shouldReturnNoMethodsWhenClassWithFieldsNoMethods() {
     parseClassPath(HasFooAsMember.class);
-    List<AccessPoint> ep = new ArrayList<AccessPoint>();
-    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).hasSize(1);
+    assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
+        .hasSize(1);
+  }
+
+  @Test
+  public void shouldReturnTrueIfEntryPoint() {
+    when(this.eprt.isEntryPoint(anyInt(), eq("main"), anyString()))
+        .thenReturn(true);
+    assertThat(eprt.isEntryPoint(1, "main", "moo")).isTrue();
+  }
+
+  @Test
+  public void shouldReturnFalseIfNotEntryPoint() {
+    when(this.eprt.isEntryPoint(anyInt(), eq("main"), anyString()))
+        .thenReturn(true);
+    assertThat(eprt.isEntryPoint(1, "foo", "moo")).isFalse();
   }
 
   private Filter matchOnlyExampleDotCom() {
