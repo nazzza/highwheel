@@ -29,26 +29,18 @@ import com.example.HasFooAsMember;
 import com.example.HasFooAsParameter;
 import com.example.Unconnected;
 
-import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 
 public class OrphanAnalyserSystemTest {
 
-  private OrphanAnalyser                      testee;
-  private DirectedGraph<AccessPoint, Integer> g = new DirectedSparseGraph<AccessPoint, Integer>();
-
-  private MethodDependencyGraphBuildingVisitor mdgbv = new MethodDependencyGraphBuildingVisitor(
-      g);
-
-  // private EntryPointRecogniser epr;
+  private OrphanAnalyser<AccessPoint, Integer> testee = new OrphanAnalyser<AccessPoint, Integer>();
+  private MethodDependencyGraphBuildingVisitor mdgbv  = new MethodDependencyGraphBuildingVisitor(
+      new DirectedSparseGraph<AccessPoint, Integer>());
 
   private ClassPathParser cpp;
 
   @Mock
   private AccessVisitor v;
-
-  // @Mock
-  // EntryPointRecogniserTool epl;
 
   @Before
   public void setUp() {
@@ -58,78 +50,55 @@ public class OrphanAnalyserSystemTest {
   @Test
   public void shouldReturnEmptyGraphWhenNoClass() {
     parseClassPath();
-    assertThat(mdgbv.getGraph()).isEqualTo(g);
+    assertThat(mdgbv.getGraph().getVertexCount()).isEqualTo(0);
   }
 
   @Test
-  public void shouldReturnGraphWithOneMethod() {
+  public void shouldReturnUncalledMethodWhenSingleClass() {
     parseClassPath(Foo.class);
     List<AccessPoint> ep = new ArrayList<AccessPoint>();
-    testee = new OrphanAnalyser<AccessPoint, Object>();
-    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).containsOnly(
-        access(Foo.class, method("aMethod", Object.class)),
-        access(Foo.class, method("<init>", "()V")));
+    assertThat(testee.findOrphans(mdgbv.getGraph(), ep))
+        .contains(access(Foo.class, method("aMethod", Object.class)));
   }
 
   @Test
-  public void shouldReturnGraphWithNoMethodsWhenClassEmpty() {
+  public void shouldNotReturnUncalledMethodWhenSingleClassWithEntryPoint() {
+    parseClassPath(Foo.class);
+    List<AccessPoint> ep = new ArrayList<AccessPoint>();
+    ep.add(access(Foo.class, method("aMethod", Object.class)));
+    assertThat(testee.findOrphans(mdgbv.getGraph(), ep))
+        .doesNotContain(access(Foo.class, method("aMethod", Object.class)));
+  }
+
+  @Test
+  public void shouldReturnNoMethodsWhenClassEmpty() {
     parseClassPath(Unconnected.class);
     List<AccessPoint> ep = new ArrayList<AccessPoint>();
-    testee = new OrphanAnalyser();
-    assertThat(testee.findOrphans(mdgbv.getGraph(), ep))
-        .containsOnly(access(Unconnected.class, method("<init>", "()V")));
+    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).hasSize(1);
   }
 
   @Test
-  public void shouldReturnGraphWithTwoMethods() {
+  public void shouldReturnUnconnectedMethodsWhenClasessWithNoEntryPoint() {
     parseClassPath(Foo.class, HasFooAsParameter.class);
     List<AccessPoint> ep = new ArrayList<AccessPoint>();
-    testee = new OrphanAnalyser<AccessPoint, Object>();
-    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).containsOnly(
+    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).contains(
         access(HasFooAsParameter.class, methodWithParameter("foo", Foo.class)),
-        access(Foo.class, method("aMethod", Object.class)),
-        access(Foo.class, method("<init>", "()V")),
-        access(HasFooAsParameter.class, method("<init>", "()V")));
+        access(Foo.class, method("aMethod", Object.class)));
   }
 
   @Test
-  public void shouldReturnNoOrphansWhenClassWithNoMethods() {
-    parseClassPath(HasFooAsMember.class);
-    List<AccessPoint> ep = new ArrayList<AccessPoint>();
-    testee = new OrphanAnalyser<AccessPoint, Object>();
-    assertThat(testee.findOrphans(mdgbv.getGraph(), ep))
-        .containsOnly((access(HasFooAsMember.class, method("<init>", "()V"))));
-  }
-
-  @Test
-  public void shouldReturnTwoOrphansWhenMethodsConnectedNoEntryPoint() {
-    parseClassPath(CallsFooMethod.class, Foo.class);
-    List<AccessPoint> ep = new ArrayList<AccessPoint>();
-    testee = new OrphanAnalyser<AccessPoint, Object>();
-    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).containsOnly(
-        (access(CallsFooMethod.class, method("<init>", "()V"))),
-        (access(Foo.class, method("<init>", "()V"))),
-        (access(CallsFooMethod.class, method("foo", Object.class))),
-        (access(Foo.class, method("aMethod", Object.class))));
-  }
-
-  @Test
-  public void shouldReturnNoOrphansWhenMethodsConnectedWithEntryPoint() {
-    parseClassPath(CallsFooMethod.class, Foo.class);
+  public void shouldNotReturnUnconnectedMethodsWhenClasessWithEntryPoint() {
+    parseClassPath(Foo.class, CallsFooMethod.class);
     List<AccessPoint> ep = new ArrayList<AccessPoint>();
     ep.add(access(CallsFooMethod.class, method("foo", Object.class)));
-    testee = new OrphanAnalyser<AccessPoint, Object>();
-    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).containsOnly(
-        access(CallsFooMethod.class, method("<init>", "()V")),
-        access(Foo.class, method("<init>", "()V")));
+    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).hasSize(2);
   }
 
-  private DirectedGraph<AccessPoint, Integer> expectedGraph(AccessPoint... v) {
-    DirectedGraph<AccessPoint, Integer> e = new DirectedSparseGraph<AccessPoint, Integer>();
-    for (AccessPoint ap : v) {
-      e.addVertex(ap);
-    }
-    return e;
+  @Test
+  public void shouldReturnNoMethodsWhenClassWithFieldsNoMethods() {
+    parseClassPath(HasFooAsMember.class);
+    List<AccessPoint> ep = new ArrayList<AccessPoint>();
+    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).hasSize(1);
   }
 
   private Filter matchOnlyExampleDotCom() {
