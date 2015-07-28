@@ -10,11 +10,9 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.objectweb.asm.Type;
 import org.pitest.highwheel.bytecodeparser.classpath.ClassLoaderClassPathRoot;
-import org.pitest.highwheel.classpath.AccessVisitor;
 import org.pitest.highwheel.classpath.ClasspathRoot;
 import org.pitest.highwheel.cycles.Filter;
 import org.pitest.highwheel.cycles.MethodDependencyGraphBuildingVisitor;
@@ -38,9 +36,6 @@ public class OrphanAnalyserSystemTest {
       new DirectedSparseGraph<AccessPoint, Integer>());
 
   private ClassPathParser cpp;
-
-  @Mock
-  private AccessVisitor v;
 
   @Before
   public void setUp() {

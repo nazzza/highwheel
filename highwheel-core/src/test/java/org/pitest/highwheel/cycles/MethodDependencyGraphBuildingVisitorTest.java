@@ -58,6 +58,13 @@ public class MethodDependencyGraphBuildingVisitorTest {
     assertThat(testee.getGraph().getVertices()).isNotEmpty();
   }
 
+  @Test
+  public void shouldAddEntryPoint() {
+    testee.newEntryPoint(access("foo", accessPoint("a")));
+    assertThat(testee.getEntryPoints())
+        .containsOnly(access("foo", accessPoint("a")));
+  }
+
   private AccessPoint access(String element, final AccessPointName point) {
     return access(element(element), point);
   }

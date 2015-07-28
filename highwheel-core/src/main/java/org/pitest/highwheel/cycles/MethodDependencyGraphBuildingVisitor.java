@@ -2,6 +2,9 @@ package org.pitest.highwheel.cycles;
 
 import static org.pitest.highwheel.model.AccessType.USES;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.pitest.highwheel.classpath.AccessVisitor;
 import org.pitest.highwheel.model.AccessPoint;
 import org.pitest.highwheel.model.AccessType;
@@ -12,6 +15,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 public class MethodDependencyGraphBuildingVisitor implements AccessVisitor {
 
   private final DirectedGraph<AccessPoint, Integer> g;
+  private List<AccessPoint>                         ep = new ArrayList<AccessPoint>();
 
   public MethodDependencyGraphBuildingVisitor(
       final DirectedGraph<AccessPoint, Integer> g) {
@@ -31,6 +35,10 @@ public class MethodDependencyGraphBuildingVisitor implements AccessVisitor {
     return this.g;
   }
 
+  public List<AccessPoint> getEntryPoints() {
+    return this.ep;
+  }
+
   @Override
   public void newNode(final ElementName clazz) {
 
@@ -38,7 +46,7 @@ public class MethodDependencyGraphBuildingVisitor implements AccessVisitor {
 
   @Override
   public void newEntryPoint(final AccessPoint ap) {
-
+    ep.add(ap);
   }
 
   @Override
