@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,8 +21,11 @@ import org.pitest.highwheel.cycles.MethodDependencyGraphBuildingVisitor;
 import org.pitest.highwheel.model.AccessPoint;
 import org.pitest.highwheel.model.AccessPointName;
 import org.pitest.highwheel.model.ElementName;
+import org.pitest.highwheel.orphans.OrphanAnalyser;
 
+import com.example.CallsFooMethod;
 import com.example.Foo;
+import com.example.HasFooAsMember;
 import com.example.HasFooAsParameter;
 import com.example.Unconnected;
 
@@ -30,7 +34,7 @@ import edu.uci.ics.jung.graph.DirectedSparseGraph;
 
 public class OrphanAnalyserSystemTest {
 
-  // private OrphanAnalyser testee;
+  private OrphanAnalyser                      testee;
   private DirectedGraph<AccessPoint, Integer> g = new DirectedSparseGraph<AccessPoint, Integer>();
 
   private MethodDependencyGraphBuildingVisitor mdgbv = new MethodDependencyGraphBuildingVisitor(
@@ -60,22 +64,64 @@ public class OrphanAnalyserSystemTest {
   @Test
   public void shouldReturnGraphWithOneMethod() {
     parseClassPath(Foo.class);
-    assertThat(mdgbv.getGraph().getVertices())
-        .contains(access(Foo.class, method("aMethod", Object.class)));
+    List<AccessPoint> ep = new ArrayList<AccessPoint>();
+    testee = new OrphanAnalyser<AccessPoint, Object>();
+    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).containsOnly(
+        access(Foo.class, method("aMethod", Object.class)),
+        access(Foo.class, method("<init>", "()V")));
   }
 
   @Test
   public void shouldReturnGraphWithNoMethodsWhenClassEmpty() {
     parseClassPath(Unconnected.class);
-    assertThat(mdgbv.getGraph().getVertices().size()).isEqualTo(1); // only init
+    List<AccessPoint> ep = new ArrayList<AccessPoint>();
+    testee = new OrphanAnalyser();
+    assertThat(testee.findOrphans(mdgbv.getGraph(), ep))
+        .containsOnly(access(Unconnected.class, method("<init>", "()V")));
   }
 
   @Test
   public void shouldReturnGraphWithTwoMethods() {
     parseClassPath(Foo.class, HasFooAsParameter.class);
-    assertThat(mdgbv.getGraph().getVertices()).contains(
+    List<AccessPoint> ep = new ArrayList<AccessPoint>();
+    testee = new OrphanAnalyser<AccessPoint, Object>();
+    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).containsOnly(
         access(HasFooAsParameter.class, methodWithParameter("foo", Foo.class)),
-        access(Foo.class, method("aMethod", Object.class)));
+        access(Foo.class, method("aMethod", Object.class)),
+        access(Foo.class, method("<init>", "()V")),
+        access(HasFooAsParameter.class, method("<init>", "()V")));
+  }
+
+  @Test
+  public void shouldReturnNoOrphansWhenClassWithNoMethods() {
+    parseClassPath(HasFooAsMember.class);
+    List<AccessPoint> ep = new ArrayList<AccessPoint>();
+    testee = new OrphanAnalyser<AccessPoint, Object>();
+    assertThat(testee.findOrphans(mdgbv.getGraph(), ep))
+        .containsOnly((access(HasFooAsMember.class, method("<init>", "()V"))));
+  }
+
+  @Test
+  public void shouldReturnTwoOrphansWhenMethodsConnectedNoEntryPoint() {
+    parseClassPath(CallsFooMethod.class, Foo.class);
+    List<AccessPoint> ep = new ArrayList<AccessPoint>();
+    testee = new OrphanAnalyser<AccessPoint, Object>();
+    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).containsOnly(
+        (access(CallsFooMethod.class, method("<init>", "()V"))),
+        (access(Foo.class, method("<init>", "()V"))),
+        (access(CallsFooMethod.class, method("foo", Object.class))),
+        (access(Foo.class, method("aMethod", Object.class))));
+  }
+
+  @Test
+  public void shouldReturnNoOrphansWhenMethodsConnectedWithEntryPoint() {
+    parseClassPath(CallsFooMethod.class, Foo.class);
+    List<AccessPoint> ep = new ArrayList<AccessPoint>();
+    ep.add(access(CallsFooMethod.class, method("foo", Object.class)));
+    testee = new OrphanAnalyser<AccessPoint, Object>();
+    assertThat(testee.findOrphans(mdgbv.getGraph(), ep)).containsOnly(
+        access(CallsFooMethod.class, method("<init>", "()V")),
+        access(Foo.class, method("<init>", "()V")));
   }
 
   private DirectedGraph<AccessPoint, Integer> expectedGraph(AccessPoint... v) {
