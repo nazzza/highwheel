@@ -22,15 +22,15 @@ public class ClassPathParser implements ClassParser {
         new DefaultEntryPointRecogniser());
   }
 
-  public ClassPathParser(final Filter filter, final EntryPointRecogniser eprt) {
-    this(filter, new CollapseInnerClassesNameTransformer(), eprt);
+  public ClassPathParser(final Filter filter, final EntryPointRecogniser epr) {
+    this(filter, new CollapseInnerClassesNameTransformer(), epr);
   }
 
   public ClassPathParser(final Filter filter,
-      final NameTransformer nameTransformer, final EntryPointRecogniser eprt) {
+      final NameTransformer nameTransformer, final EntryPointRecogniser epr) {
     this.filter = filter;
     this.nameTransformer = nameTransformer;
-    this.epr = eprt;
+    this.epr = epr;
   }
 
   @Override

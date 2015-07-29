@@ -24,85 +24,97 @@ import org.pitest.highwheel.cycles.MethodDependencyGraphBuildingVisitor;
 import org.pitest.highwheel.model.AccessPoint;
 import org.pitest.highwheel.model.AccessPointName;
 import org.pitest.highwheel.model.ElementName;
-import org.pitest.highwheel.orphans.OrphanAnalyser;
+import org.pitest.highwheel.orphans.OrphanAnalysis;
 
 import com.example.CallsFooMethod;
 import com.example.Foo;
 import com.example.HasFooAsMember;
 import com.example.HasFooAsParameter;
 import com.example.Unconnected;
+import com.example.scenarios.MemberOfCycle1;
+import com.example.scenarios.MemberOfCycle2;
 
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 
 public class OrphanAnalyserSystemTest {
 
-  private OrphanAnalyser<AccessPoint, Integer> testee = new OrphanAnalyser<AccessPoint, Integer>();
-  private MethodDependencyGraphBuildingVisitor mdgbv  = new MethodDependencyGraphBuildingVisitor(
+  private MethodDependencyGraphBuildingVisitor mdgbv = new MethodDependencyGraphBuildingVisitor(
       new DirectedSparseGraph<AccessPoint, Integer>());
 
-  private ClassPathParser cpp;
-
-  @Before
-  public void setUp() {
-    MockitoAnnotations.initMocks(this);
-  }
+  private OrphanAnalysis testee;
 
   @Mock
   private EntryPointRecogniser epr;
 
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
+    testee = new OrphanAnalysis(makeToSeeOnlyExampleDotCom());
+
+  }
+
   @Test
   public void shouldReturnEmptyGraphWhenNoClass() {
-    parseClassPath();
+    createRootFor();
     assertThat(mdgbv.getGraph().getVertexCount()).isEqualTo(0);
   }
 
   @Test
-  public void shouldReturnUncalledMethodWhenSingleClass() {
-    parseClassPath(Foo.class);
-    assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
+  public void shouldReturnUncalledMethodWhenSingleClass() throws IOException {
+    assertThat(testee.findOrphans(createRootFor(Foo.class)))
         .contains(access(Foo.class, method("aMethod", Object.class)));
   }
 
   @Test
-  public void shouldReturnNoMethodsWhenClassEmpty() {
-    parseClassPath(Unconnected.class);
-    assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
-        .hasSize(1);
+  public void shouldReturnNoMethodsWhenClassEmpty() throws IOException {
+    assertThat(testee.findOrphans(createRootFor(Unconnected.class))).hasSize(1);
   }
 
   @Test
-  public void shouldReturnUnconnectedMethodsWhenClasessWithNoEntryPoint() {
-    parseClassPath(Foo.class, HasFooAsParameter.class);
-    assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
-        .contains(
-            access(HasFooAsParameter.class,
-                methodWithParameter("foo", Foo.class)),
-            access(Foo.class, method("aMethod", Object.class)));
+  public void shouldReturnUnconnectedMethodsWhenClasessWithNoEntryPoint()
+      throws IOException {
+    assertThat(
+        testee.findOrphans(createRootFor(Foo.class, HasFooAsParameter.class)))
+            .contains(
+                access(HasFooAsParameter.class,
+                    methodWithParameter("foo", Foo.class)),
+                access(Foo.class, method("aMethod", Object.class)));
   }
 
   @Test
-  public void shouldReturnNoUncalledMethodWhenSingleClassWithEntryPoint() {
+  public void shouldReturnNoUncalledMethodWhenSingleClassWithEntryPoint()
+      throws IOException {
     when(this.epr.isEntryPoint(anyInt(), eq("aMethod"), anyString()))
         .thenReturn(true);
-    parseClassPath(Foo.class);
-    assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
+    assertThat(testee.findOrphans(createRootFor(Foo.class)))
         .doesNotContain(access(Foo.class, method("aMethod", Object.class)));
   }
 
   @Test
-  public void shouldNotReturnUnconnectedMethodsWhenClasessWithEntryPoint() {
+  public void shouldNotReturnUnconnectedMethodsWhenClasessWithEntryPoint()
+      throws IOException {
     when(this.epr.isEntryPoint(anyInt(), eq("foo"), anyString()))
         .thenReturn(true);
-    parseClassPath(Foo.class, CallsFooMethod.class);
-    assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
-        .hasSize(2);
+    assertThat(
+        testee.findOrphans(createRootFor(Foo.class, CallsFooMethod.class)))
+            .hasSize(2);
   }
 
   @Test
-  public void shouldReturnNoMethodsWhenClassWithFieldsNoMethods() {
-    parseClassPath(HasFooAsMember.class);
-    assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
+  public void shouldReturnNoMethodsWhenClassWithFieldsNoMethods()
+      throws IOException {
+    assertThat(testee.findOrphans(createRootFor(HasFooAsMember.class)))
         .hasSize(1);
+  }
+
+  @Test
+  public void shouldReturnNoMethodsWhenConnectedToEntryPointInCircle()
+      throws IOException {
+    when(this.epr.isEntryPoint(anyInt(), eq("entry"), anyString()))
+        .thenReturn(true);
+    assertThat(testee
+        .findOrphans(createRootFor(MemberOfCycle1.class, MemberOfCycle2.class)))
+            .hasSize(1);
   }
 
   private Filter matchOnlyExampleDotCom() {
@@ -116,20 +128,11 @@ public class OrphanAnalyserSystemTest {
     };
   }
 
-  private void parseClassPath(final Class<?>... classes) {
-    try {
-      this.cpp = makeToSeeOnlyExampleDotCom();
-      this.cpp.parse(createRootFor(classes), this.mdgbv);
-    } catch (final IOException ex) {
-      throw new RuntimeException(ex);
-    }
-  }
-
   private ClassPathParser makeToSeeOnlyExampleDotCom() {
     return new ClassPathParser(matchOnlyExampleDotCom(), epr);
   }
 
-  private ClasspathRoot createRootFor(final Class<?>[] classes) {
+  private ClasspathRoot createRootFor(final Class<?>... classes) {
     final Collection<ElementName> elements = new ArrayList<ElementName>();
     final ClassLoaderClassPathRoot data = new ClassLoaderClassPathRoot(
         Thread.currentThread().getContextClassLoader());
