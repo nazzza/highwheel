@@ -7,22 +7,30 @@ import org.objectweb.asm.ClassReader;
 import org.pitest.highwheel.classpath.AccessVisitor;
 import org.pitest.highwheel.classpath.ClassParser;
 import org.pitest.highwheel.classpath.ClasspathRoot;
+import org.pitest.highwheel.cycles.EntryPointRecogniser;
 import org.pitest.highwheel.cycles.Filter;
 import org.pitest.highwheel.model.ElementName;
 
 public class ClassPathParser implements ClassParser {
 
-  private final Filter          filter;
-  private final NameTransformer nameTransformer;
+  private final Filter               filter;
+  private final NameTransformer      nameTransformer;
+  private final EntryPointRecogniser epr;
 
   public ClassPathParser(final Filter filter) {
-    this(filter, new CollapseInnerClassesNameTransformer());
+    this(filter, new CollapseInnerClassesNameTransformer(),
+        new DefaultEntryPointRecogniser());
+  }
+
+  public ClassPathParser(final Filter filter, final EntryPointRecogniser eprt) {
+    this(filter, new CollapseInnerClassesNameTransformer(), eprt);
   }
 
   public ClassPathParser(final Filter filter,
-      final NameTransformer nameTransformer) {
+      final NameTransformer nameTransformer, final EntryPointRecogniser eprt) {
     this.filter = filter;
     this.nameTransformer = nameTransformer;
+    this.epr = eprt;
   }
 
   @Override
@@ -43,8 +51,7 @@ public class ClassPathParser implements ClassParser {
     try {
       final ClassReader reader = new ClassReader(is);
       final DependencyClassVisitor cv = new DependencyClassVisitor(null,
-          new FilteringDecorator(dv, this.filter), nameTransformer,
-          new EntryPointRecogniser());
+          new FilteringDecorator(dv, this.filter), nameTransformer, epr);
       reader.accept(cv, 0);
     } finally {
       is.close();

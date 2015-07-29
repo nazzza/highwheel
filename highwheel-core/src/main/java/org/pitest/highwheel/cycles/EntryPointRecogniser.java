@@ -1,6 +1,6 @@
 package org.pitest.highwheel.cycles;
 
-public interface EntryPointRecogniserTool {
+public interface EntryPointRecogniser {
 
   boolean isEntryPoint(int access, String name, String desc);
 

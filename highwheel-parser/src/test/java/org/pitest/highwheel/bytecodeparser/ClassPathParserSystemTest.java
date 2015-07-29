@@ -1,8 +1,12 @@
 package org.pitest.highwheel.bytecodeparser;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +21,7 @@ import org.objectweb.asm.Type;
 import org.pitest.highwheel.bytecodeparser.classpath.ClassLoaderClassPathRoot;
 import org.pitest.highwheel.classpath.AccessVisitor;
 import org.pitest.highwheel.classpath.ClasspathRoot;
+import org.pitest.highwheel.cycles.EntryPointRecogniser;
 import org.pitest.highwheel.cycles.Filter;
 import org.pitest.highwheel.model.AccessPoint;
 import org.pitest.highwheel.model.AccessPointName;
@@ -62,6 +67,9 @@ public class ClassPathParserSystemTest {
 
   @Mock
   private AccessVisitor v;
+
+  @Mock
+  private EntryPointRecogniser epr;
 
   @Before
   public void setUp() {
@@ -281,12 +289,10 @@ public class ClassPathParserSystemTest {
 
   @Test
   public void shouldDetectEntryPointsInClassesWithMainMethod() {
+    when(this.epr.isEntryPoint(anyInt(), eq("main"), anyString()))
+        .thenReturn(true);
     parseClassPath(HasMainMethod.class);
-
-    verify(this.v)
-        .newEntryPoint(access(ElementName.fromClass(HasMainMethod.class),
-            AccessPointName.create("main", "([Ljava/lang/String;)V")));
-    // verify(this.v).newEntryPoint(ElementName.fromClass(HasMainMethod.class));
+    verify(this.v).newEntryPoint(any(AccessPoint.class));
   }
 
   @Test
@@ -316,7 +322,7 @@ public class ClassPathParserSystemTest {
   }
 
   private ClassPathParser makeToSeeOnlyExampleDotCom() {
-    return new ClassPathParser(matchOnlyExampleDotCom());
+    return new ClassPathParser(matchOnlyExampleDotCom(), epr);
   }
 
   private ClasspathRoot createRootFor(final Class<?>[] classes) {
@@ -388,25 +394,6 @@ public class ClassPathParserSystemTest {
   private AccessPointName method(String name, Class<?> retType) {
     return AccessPointName.create(name,
         Type.getMethodDescriptor(Type.getType(retType)));
-  }
-
-  /// added
-
-  private AccessPoint access(String element, final AccessPointName point) {
-    return access(element(element), point);
-  }
-
-  private AccessPoint access(final ElementName element,
-      final AccessPointName point) {
-    return AccessPoint.create(element, point);
-  }
-
-  private AccessPointName accessPoint(final String name) {
-    return AccessPointName.create(name, "");
-  }
-
-  private ElementName element(final String type) {
-    return ElementName.fromString(type);
   }
 
 }

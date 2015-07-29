@@ -35,7 +35,7 @@ public class AnalyseMojo extends BaseMojo {
   @Override
   protected void analyse(final ClasspathRoot mainRoot,
       final ClasspathRoot testRoot, final Filter filter)
-      throws MojoExecutionException {
+          throws MojoExecutionException {
     try {
 
       final ClassPathParser parser = new ClassPathParser(filter);

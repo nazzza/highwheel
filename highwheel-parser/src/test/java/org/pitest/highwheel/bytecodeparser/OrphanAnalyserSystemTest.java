@@ -18,7 +18,7 @@ import org.mockito.MockitoAnnotations;
 import org.objectweb.asm.Type;
 import org.pitest.highwheel.bytecodeparser.classpath.ClassLoaderClassPathRoot;
 import org.pitest.highwheel.classpath.ClasspathRoot;
-import org.pitest.highwheel.cycles.EntryPointRecogniserTool;
+import org.pitest.highwheel.cycles.EntryPointRecogniser;
 import org.pitest.highwheel.cycles.Filter;
 import org.pitest.highwheel.cycles.MethodDependencyGraphBuildingVisitor;
 import org.pitest.highwheel.model.AccessPoint;
@@ -48,7 +48,7 @@ public class OrphanAnalyserSystemTest {
   }
 
   @Mock
-  private EntryPointRecogniserTool eprt;
+  private EntryPointRecogniser epr;
 
   @Test
   public void shouldReturnEmptyGraphWhenNoClass() {
@@ -82,17 +82,18 @@ public class OrphanAnalyserSystemTest {
 
   @Test
   public void shouldReturnNoUncalledMethodWhenSingleClassWithEntryPoint() {
+    when(this.epr.isEntryPoint(anyInt(), eq("aMethod"), anyString()))
+        .thenReturn(true);
     parseClassPath(Foo.class);
-    mdgbv.newEntryPoint(access(Foo.class, method("aMethod", Object.class)));
     assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
         .doesNotContain(access(Foo.class, method("aMethod", Object.class)));
   }
 
   @Test
   public void shouldNotReturnUnconnectedMethodsWhenClasessWithEntryPoint() {
+    when(this.epr.isEntryPoint(anyInt(), eq("foo"), anyString()))
+        .thenReturn(true);
     parseClassPath(Foo.class, CallsFooMethod.class);
-    mdgbv.newEntryPoint(
-        access(CallsFooMethod.class, method("foo", Object.class)));
     assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
         .hasSize(2);
   }
@@ -102,20 +103,6 @@ public class OrphanAnalyserSystemTest {
     parseClassPath(HasFooAsMember.class);
     assertThat(testee.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints()))
         .hasSize(1);
-  }
-
-  @Test
-  public void shouldReturnTrueIfEntryPoint() {
-    when(this.eprt.isEntryPoint(anyInt(), eq("main"), anyString()))
-        .thenReturn(true);
-    assertThat(eprt.isEntryPoint(1, "main", "moo")).isTrue();
-  }
-
-  @Test
-  public void shouldReturnFalseIfNotEntryPoint() {
-    when(this.eprt.isEntryPoint(anyInt(), eq("main"), anyString()))
-        .thenReturn(true);
-    assertThat(eprt.isEntryPoint(1, "foo", "moo")).isFalse();
   }
 
   private Filter matchOnlyExampleDotCom() {
@@ -139,7 +126,7 @@ public class OrphanAnalyserSystemTest {
   }
 
   private ClassPathParser makeToSeeOnlyExampleDotCom() {
-    return new ClassPathParser(matchOnlyExampleDotCom());
+    return new ClassPathParser(matchOnlyExampleDotCom(), epr);
   }
 
   private ClasspathRoot createRootFor(final Class<?>[] classes) {

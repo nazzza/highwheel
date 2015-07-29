@@ -10,13 +10,13 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 import org.pitest.highwheel.classpath.AccessVisitor;
-import org.pitest.highwheel.cycles.EntryPointRecogniserTool;
+import org.pitest.highwheel.cycles.EntryPointRecogniser;
 import org.pitest.highwheel.model.AccessPoint;
 import org.pitest.highwheel.model.AccessPointName;
 import org.pitest.highwheel.model.AccessType;
 import org.pitest.highwheel.model.ElementName;
 
-class EntryPointRecogniser implements EntryPointRecogniserTool {
+class DefaultEntryPointRecogniser implements EntryPointRecogniser {
 
   @Override
   public boolean isEntryPoint(int access, String name, String desc) {

@@ -23,13 +23,16 @@ public class ClassPathParserTest {
   private ClassPathParser testee;
 
   @Mock
-  private ClasspathRoot   cp;
+  private ClasspathRoot cp;
 
   @Mock
-  private Filter          filter;
+  private Filter filter;
+
+  // @Mock
+  // private EntryPointRecogniser epr;
 
   @Mock
-  private AccessVisitor   v;
+  private AccessVisitor v;
 
   @Before
   public void setUp() {
@@ -42,10 +45,10 @@ public class ClassPathParserTest {
     final ElementName foo = ElementName.fromString("foo");
     when(this.cp.classNames()).thenReturn(Collections.singleton(foo));
     when(this.filter.include(foo)).thenReturn(false);
-    testee.parse(cp,v);
-    verify(cp,never()).getData(foo);
+    testee.parse(cp, v);
+    verify(cp, never()).getData(foo);
   }
-  
+
   @Test
   public void shouldCloseClassInputStreams() throws IOException {
     final ElementName foo = ElementName.fromString("foo");
@@ -55,7 +58,7 @@ public class ClassPathParserTest {
     when(this.cp.getData(foo)).thenReturn(is);
     when(is.read()).thenThrow(new IOException());
     try {
-      this.testee.parse(cp,this.v);
+      this.testee.parse(cp, this.v);
     } catch (final IOException ex) {
       // expected
     }
