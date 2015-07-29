@@ -56,7 +56,7 @@ public class OrphanAnalyserSystemTest {
   @Test
   public void shouldReturnEmptyGraphWhenNoClass() {
     createRootFor();
-    assertThat(mdgbv.getGraph().getVertexCount()).isEqualTo(0);
+    assertThat(mdgbv.getGraph().getVertices()).isEmpty();
   }
 
   @Test
@@ -67,7 +67,7 @@ public class OrphanAnalyserSystemTest {
 
   @Test
   public void shouldReturnNoMethodsWhenClassEmpty() throws IOException {
-    assertThat(testee.findOrphans(createRootFor(Unconnected.class))).hasSize(1);
+    assertThat(testee.findOrphans(createRootFor(Unconnected.class))).isEmpty();
   }
 
   @Test
@@ -97,14 +97,14 @@ public class OrphanAnalyserSystemTest {
         .thenReturn(true);
     assertThat(
         testee.findOrphans(createRootFor(Foo.class, CallsFooMethod.class)))
-            .hasSize(2);
+            .isEmpty();
   }
 
   @Test
   public void shouldReturnNoMethodsWhenClassWithFieldsNoMethods()
       throws IOException {
     assertThat(testee.findOrphans(createRootFor(HasFooAsMember.class)))
-        .hasSize(1);
+        .isEmpty();
   }
 
   @Test
@@ -114,7 +114,7 @@ public class OrphanAnalyserSystemTest {
         .thenReturn(true);
     assertThat(testee
         .findOrphans(createRootFor(MemberOfCycle1.class, MemberOfCycle2.class)))
-            .hasSize(1);
+            .isEmpty();
   }
 
   private Filter matchOnlyExampleDotCom() {

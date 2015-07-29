@@ -1,6 +1,7 @@
 package org.pitest.highwheel.orphans;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.pitest.highwheel.classpath.ClassParser;
@@ -23,10 +24,22 @@ public class OrphanAnalysis {
     MethodDependencyGraphBuildingVisitor mdgbv = new MethodDependencyGraphBuildingVisitor(
         new DirectedSparseGraph<AccessPoint, Integer>());
     this.parser.parse(root, mdgbv);
+    return orphansWithoutInitConstructors(mdgbv);
+
+  }
+
+  private Collection<AccessPoint> orphansWithoutInitConstructors(
+      MethodDependencyGraphBuildingVisitor mdgbv) {
     OrphanAnalyser<AccessPoint, Integer> oa = new OrphanAnalyser<AccessPoint, Integer>();
-    return oa.findOrphans(mdgbv.getGraph(), mdgbv.getEntryPoints());
-    // Collection<AccessPoint> c = Collections.EMPTY_LIST;
-    // return c;
+    Collection<AccessPoint> orphans = oa.findOrphans(mdgbv.getGraph(),
+        mdgbv.getEntryPoints());
+    Collection<AccessPoint> cleanOrphans = new ArrayList<AccessPoint>();
+    cleanOrphans.addAll(orphans);
+    for (AccessPoint o : orphans) {
+      if (o.toString().contains("init"))
+        cleanOrphans.remove(o);
+    }
+    return cleanOrphans;
   }
 
 }
