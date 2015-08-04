@@ -28,11 +28,18 @@ import org.pitest.highwheel.orphans.OrphanAnalysis;
 
 import com.example.CallsFooMethod;
 import com.example.Foo;
+import com.example.HasAMisleadingMethodName;
 import com.example.HasFooAsMember;
 import com.example.HasFooAsParameter;
 import com.example.Unconnected;
 import com.example.scenarios.MemberOfCycle1;
 import com.example.scenarios.MemberOfCycle2;
+import com.example.scenarios.Inheritance.ChildClassExtendsParentClass;
+import com.example.scenarios.Inheritance.EntryPointInheritace;
+import com.example.scenarios.Inheritance.ParentClass;
+import com.example.scenarios.InterfaceCall.AnInterfaceWithAMethod;
+import com.example.scenarios.InterfaceCall.EntryPoint;
+import com.example.scenarios.InterfaceCall.ImplementsAnInterfaceWithAMethod;
 
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 
@@ -115,6 +122,36 @@ public class OrphanAnalyserSystemTest {
     assertThat(testee
         .findOrphans(createRootFor(MemberOfCycle1.class, MemberOfCycle2.class)))
             .isEmpty();
+  }
+
+  @Test
+  public void shouldReturnUnconnectedMethodCalledInit() throws IOException {
+    assertThat(
+        testee.findOrphans(createRootFor(HasAMisleadingMethodName.class)))
+            .isNotEmpty();
+  }
+
+  @Test
+  public void shouldNotReturnAMethodImplementedFromAnInterface()
+      throws IOException {
+    when(this.epr.isEntryPoint(anyInt(), eq("entryPoint"), anyString()))
+        .thenReturn(true);
+    assertThat(
+        testee.findOrphans(createRootFor(ImplementsAnInterfaceWithAMethod.class,
+            EntryPoint.class, AnInterfaceWithAMethod.class)))
+                .doesNotContain(access(ImplementsAnInterfaceWithAMethod.class,
+                    method("aMethodToImplement", Object.class)));
+  }
+
+  @Test
+  public void shouldNotReturnAMethodInheritedFromAParentClass()
+      throws IOException {
+    when(this.epr.isEntryPoint(anyInt(), eq("entryPoint"), anyString()))
+        .thenReturn(true);
+    assertThat(testee.findOrphans(createRootFor(ParentClass.class,
+        ChildClassExtendsParentClass.class, EntryPointInheritace.class)))
+            .doesNotContain(access(ChildClassExtendsParentClass.class,
+                method("parentMethod", Object.class)));
   }
 
   private Filter matchOnlyExampleDotCom() {

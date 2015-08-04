@@ -24,20 +24,21 @@ public class OrphanAnalysis {
     MethodDependencyGraphBuildingVisitor mdgbv = new MethodDependencyGraphBuildingVisitor(
         new DirectedSparseGraph<AccessPoint, Integer>());
     this.parser.parse(root, mdgbv);
-    return orphansWithoutInitConstructors(mdgbv);
+    OrphanAnalyser<AccessPoint, Integer> oa = new OrphanAnalyser<AccessPoint, Integer>();
+    Collection<AccessPoint> orphans = oa.findOrphans(mdgbv.getGraph(),
+        mdgbv.getEntryPoints());
+    return orphansWithoutInitConstructors(orphans);
 
   }
 
   private Collection<AccessPoint> orphansWithoutInitConstructors(
-      MethodDependencyGraphBuildingVisitor mdgbv) {
-    OrphanAnalyser<AccessPoint, Integer> oa = new OrphanAnalyser<AccessPoint, Integer>();
-    Collection<AccessPoint> orphans = oa.findOrphans(mdgbv.getGraph(),
-        mdgbv.getEntryPoints());
+      Collection<AccessPoint> orphans) {
     Collection<AccessPoint> cleanOrphans = new ArrayList<AccessPoint>();
-    cleanOrphans.addAll(orphans);
     for (AccessPoint o : orphans) {
-      if (o.toString().contains("init"))
-        cleanOrphans.remove(o);
+      if (!o.getAttribute().toString().equals("<init>")
+          && !o.getAttribute().getDesc().equals("()V")) {
+        cleanOrphans.add(o);
+      }
     }
     return cleanOrphans;
   }

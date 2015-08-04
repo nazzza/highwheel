@@ -1,22 +1,28 @@
 package org.pitest.highwheel.model;
 
 public final class AccessPointName {
-  
+
   private final String name;
-  
-  // We store the method/field descriptor so we can distinguish between different methods of
+
+  // We store the method/field descriptor so we can distinguish between
+  // different methods of
   // the same name. Not yet clear how this will be communicated externally
   private final String desc;
-  
+
   AccessPointName(String name, String desc) {
     this.name = name;
     this.desc = desc;
   }
 
   public static AccessPointName create(String name, String desc) {
-    return new AccessPointName(name.replace('<', '(').replace('>', ')').intern(),desc);
+    return new AccessPointName(
+        name.replace('<', '(').replace('>', ')').intern(), desc);
   }
-  
+
+  public String getDesc() {
+    return desc;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -47,7 +53,7 @@ public final class AccessPointName {
       return false;
     return true;
   }
-  
+
   @Override
   public String toString() {
     return name;
