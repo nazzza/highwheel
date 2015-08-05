@@ -7,4 +7,7 @@ import org.pitest.highwheel.model.ElementName;
 public interface HierarchyOracle {
 
   Set<ElementName> findParents(ElementName element);
+
+  Set<ElementName> findChildren(ElementName element);
+
 }

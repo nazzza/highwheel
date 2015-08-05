@@ -21,8 +21,11 @@ import org.pitest.highwheel.cycles.InheritanceDependencyMapBuildingVisitor;
 import org.pitest.highwheel.model.ElementName;
 
 import com.example.ExtendsFoo;
+import com.example.ExtendsMoo;
 import com.example.Foo;
+import com.example.Moo;
 import com.example.scenarios.DoubleInheritance.ExtendsFoo2ndTime;
+import com.example.scenarios.DoubleInheritance.ExtendsMoo2ndTime;
 import com.example.scenarios.TripleInheritance.ExtendsFoo3rdTime;
 
 public class DefaultHierarchyOracleTest {
@@ -59,10 +62,73 @@ public class DefaultHierarchyOracleTest {
         Collections.set(element(ExtendsFoo.class)));
     m.put(element(ExtendsFoo.class), Collections.set(element(Foo.class)));
     testee = new DefaultHierarchyOracle(m);
-
     assertThat(testee.findParents(element(ExtendsFoo3rdTime.class))).contains(
         element(ExtendsFoo2ndTime.class), element(ExtendsFoo.class),
         element(Foo.class));
+  }
+
+  @Test
+  public void shouldReturnDifferentSetOfParentsForDifferentChildren() {
+    parseClassPath(Foo.class, ExtendsFoo.class, ExtendsFoo2ndTime.class,
+        Moo.class, ExtendsMoo.class, ExtendsMoo2ndTime.class);
+    Map<ElementName, Set<ElementName>> m = new LinkedHashMap<ElementName, Set<ElementName>>();
+    m.put(element(ExtendsFoo2ndTime.class),
+        Collections.set(element(ExtendsFoo.class)));
+    m.put(element(ExtendsFoo.class), Collections.set(element(Foo.class)));
+    m.put(element(ExtendsMoo2ndTime.class),
+        Collections.set(element(ExtendsMoo.class)));
+    m.put(element(ExtendsMoo.class), Collections.set(element(Moo.class)));
+    testee = new DefaultHierarchyOracle(m);
+    assertThat(testee.findParents(element(ExtendsFoo2ndTime.class)))
+        .containsOnly(element(ExtendsFoo.class), element(Foo.class));
+    assertThat(testee.findParents(element(ExtendsMoo2ndTime.class)))
+        .containsOnly(element(ExtendsMoo.class), element(Moo.class));
+  }
+
+  @Test
+  public void shouldReturnASetWithTwoChildrenWhenDoubleInheritance() {
+    parseClassPath(Foo.class, ExtendsFoo.class, ExtendsFoo2ndTime.class);
+    Map<ElementName, Set<ElementName>> m = new LinkedHashMap<ElementName, Set<ElementName>>();
+    m.put(element(ExtendsFoo2ndTime.class),
+        Collections.set(element(ExtendsFoo.class)));
+    m.put(element(ExtendsFoo.class), Collections.set(element(Foo.class)));
+    testee = new DefaultHierarchyOracle(m);
+    assertThat(testee.findChildren(element(Foo.class)))
+        .contains(element(ExtendsFoo.class), element(ExtendsFoo2ndTime.class));
+  }
+
+  @Test
+  public void shouldReturnASetWithThreeChildrenWhenTripleInheritance() {
+    parseClassPath(Foo.class, ExtendsFoo.class, ExtendsFoo2ndTime.class,
+        ExtendsFoo3rdTime.class);
+    Map<ElementName, Set<ElementName>> m = new LinkedHashMap<ElementName, Set<ElementName>>();
+    m.put(element(ExtendsFoo3rdTime.class),
+        Collections.set(element(ExtendsFoo2ndTime.class)));
+    m.put(element(ExtendsFoo2ndTime.class),
+        Collections.set(element(ExtendsFoo.class)));
+    m.put(element(ExtendsFoo.class), Collections.set(element(Foo.class)));
+    testee = new DefaultHierarchyOracle(m);
+    assertThat(testee.findChildren(element(Foo.class))).contains(
+        element(ExtendsFoo2ndTime.class), element(ExtendsFoo.class),
+        element(ExtendsFoo3rdTime.class));
+  }
+
+  @Test
+  public void shouldReturnDifferentSetOfChildrenForDifferentParents() {
+    parseClassPath(Foo.class, ExtendsFoo.class, ExtendsFoo2ndTime.class,
+        Moo.class, ExtendsMoo.class, ExtendsMoo2ndTime.class);
+    Map<ElementName, Set<ElementName>> m = new LinkedHashMap<ElementName, Set<ElementName>>();
+    m.put(element(ExtendsFoo2ndTime.class),
+        Collections.set(element(ExtendsFoo.class)));
+    m.put(element(ExtendsFoo.class), Collections.set(element(Foo.class)));
+    m.put(element(ExtendsMoo2ndTime.class),
+        Collections.set(element(ExtendsMoo.class)));
+    m.put(element(ExtendsMoo.class), Collections.set(element(Moo.class)));
+    testee = new DefaultHierarchyOracle(m);
+    assertThat(testee.findChildren(element(Foo.class))).containsOnly(
+        element(ExtendsFoo.class), element(ExtendsFoo2ndTime.class));
+    assertThat(testee.findChildren(element(Moo.class))).containsOnly(
+        element(ExtendsMoo.class), element(ExtendsMoo2ndTime.class));
   }
 
   private ElementName element(final Class<?> c) {

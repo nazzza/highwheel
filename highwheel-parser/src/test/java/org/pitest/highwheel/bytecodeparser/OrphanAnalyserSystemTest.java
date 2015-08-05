@@ -20,7 +20,6 @@ import org.pitest.highwheel.bytecodeparser.classpath.ClassLoaderClassPathRoot;
 import org.pitest.highwheel.classpath.ClasspathRoot;
 import org.pitest.highwheel.cycles.EntryPointRecogniser;
 import org.pitest.highwheel.cycles.Filter;
-import org.pitest.highwheel.cycles.MethodDependencyGraphBuildingVisitor;
 import org.pitest.highwheel.model.AccessPoint;
 import org.pitest.highwheel.model.AccessPointName;
 import org.pitest.highwheel.model.ElementName;
@@ -28,10 +27,14 @@ import org.pitest.highwheel.orphans.OrphanAnalysis;
 
 import com.example.CallsFooMethod;
 import com.example.Foo;
+import com.example.FooWithAVoidMethod;
 import com.example.HasAMisleadingMethodName;
 import com.example.HasFooAsMember;
 import com.example.HasFooAsParameter;
 import com.example.Unconnected;
+import com.example.InheritanceCall.AChildImplementingAParentWithAMethod;
+import com.example.InheritanceCall.AParentWithAMethod;
+import com.example.InheritanceCall.EntryPointForInheritanceCall;
 import com.example.scenarios.MemberOfCycle1;
 import com.example.scenarios.MemberOfCycle2;
 import com.example.scenarios.Inheritance.ChildClassExtendsParentClass;
@@ -41,12 +44,7 @@ import com.example.scenarios.InterfaceCall.AnInterfaceWithAMethod;
 import com.example.scenarios.InterfaceCall.EntryPoint;
 import com.example.scenarios.InterfaceCall.ImplementsAnInterfaceWithAMethod;
 
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
-
 public class OrphanAnalyserSystemTest {
-
-  private MethodDependencyGraphBuildingVisitor mdgbv = new MethodDependencyGraphBuildingVisitor(
-      new DirectedSparseGraph<AccessPoint, Integer>());
 
   private OrphanAnalysis testee;
 
@@ -58,12 +56,6 @@ public class OrphanAnalyserSystemTest {
     MockitoAnnotations.initMocks(this);
     testee = new OrphanAnalysis(makeToSeeOnlyExampleDotCom());
 
-  }
-
-  @Test
-  public void shouldReturnEmptyGraphWhenNoClass() {
-    createRootFor();
-    assertThat(mdgbv.getGraph().getVertices()).isEmpty();
   }
 
   @Test
@@ -132,19 +124,24 @@ public class OrphanAnalyserSystemTest {
   }
 
   @Test
-  public void shouldNotReturnAMethodImplementedFromAnInterface()
+  public void shouldReturnAVoidOrphanMethodWhenSingleClass()
+      throws IOException {
+    assertThat(testee.findOrphans(createRootFor(FooWithAVoidMethod.class)))
+        .isNotEmpty();
+  }
+
+  @Test
+  public void shouldNotReturnAMethodImplementedFromAnInterfaceWhenEntryPoint()
       throws IOException {
     when(this.epr.isEntryPoint(anyInt(), eq("entryPoint"), anyString()))
         .thenReturn(true);
     assertThat(
         testee.findOrphans(createRootFor(ImplementsAnInterfaceWithAMethod.class,
-            EntryPoint.class, AnInterfaceWithAMethod.class)))
-                .doesNotContain(access(ImplementsAnInterfaceWithAMethod.class,
-                    method("aMethodToImplement", Object.class)));
+            EntryPoint.class, AnInterfaceWithAMethod.class))).isEmpty();
   }
 
   @Test
-  public void shouldNotReturnAMethodInheritedFromAParentClass()
+  public void shouldNotReturnAMethodInheritedFromAParentClassWhenEntryPoint()
       throws IOException {
     when(this.epr.isEntryPoint(anyInt(), eq("entryPoint"), anyString()))
         .thenReturn(true);
@@ -152,6 +149,26 @@ public class OrphanAnalyserSystemTest {
         ChildClassExtendsParentClass.class, EntryPointInheritace.class)))
             .doesNotContain(access(ChildClassExtendsParentClass.class,
                 method("parentMethod", Object.class)));
+  }
+
+  @Test
+  public void shouldReturnOrphanMethodsWhenNoEntryPointInheritance()
+      throws IOException {
+    when(this.epr.isEntryPoint(anyInt(), eq("entryPoint"), anyString()))
+        .thenReturn(false);
+    assertThat(testee.findOrphans(createRootFor(AParentWithAMethod.class,
+        AChildImplementingAParentWithAMethod.class,
+        EntryPointForInheritanceCall.class))).hasSize(3);
+  }
+
+  @Test
+  public void shouldReturnOrphanMethodsWhenNoEntryPointInterface()
+      throws IOException {
+    when(this.epr.isEntryPoint(anyInt(), eq("entryPoint"), anyString()))
+        .thenReturn(false);
+    assertThat(
+        testee.findOrphans(createRootFor(ImplementsAnInterfaceWithAMethod.class,
+            EntryPoint.class, AnInterfaceWithAMethod.class))).hasSize(3);
   }
 
   private Filter matchOnlyExampleDotCom() {
@@ -222,12 +239,13 @@ public class OrphanAnalyserSystemTest {
     return AccessPoint.create(ElementName.fromClass(type), method);
   }
 
-  private AccessPointName methodWithParameter(String name, Class<?> paramType) {
+  private AccessPointName methodWithParameter(final String name,
+      final Class<?> paramType) {
     return AccessPointName.create(name,
         Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(paramType)));
   }
 
-  private AccessPointName method(String name, Class<?> retType) {
+  private AccessPointName method(final String name, final Class<?> retType) {
     return AccessPointName.create(name,
         Type.getMethodDescriptor(Type.getType(retType)));
   }

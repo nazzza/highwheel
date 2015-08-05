@@ -1,9 +1,12 @@
 package org.pitest.highwheel.cycles;
 
+import static org.pitest.highwheel.model.AccessType.IMPLEMENTS;
 import static org.pitest.highwheel.model.AccessType.INHERITANCE;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.pitest.highwheel.classpath.AccessVisitor;
 import org.pitest.highwheel.model.AccessPoint;
@@ -13,9 +16,9 @@ import org.pitest.highwheel.model.ElementName;
 public class InheritanceDependencyMapBuildingVisitor implements AccessVisitor {
 
   // Map <Child, SetOfParents>
-  private final LinkedHashMap<ElementName, LinkedHashSet<ElementName>> m = new LinkedHashMap<ElementName, LinkedHashSet<ElementName>>();
+  private final Map<ElementName, Set<ElementName>> m = new LinkedHashMap<ElementName, Set<ElementName>>();
 
-  public LinkedHashMap<ElementName, LinkedHashSet<ElementName>> getMap() {
+  public Map<ElementName, Set<ElementName>> getMap() {
     return m;
   }
 
@@ -24,7 +27,7 @@ public class InheritanceDependencyMapBuildingVisitor implements AccessVisitor {
       final AccessType type) {
     final ElementName sourceClass = source.getElementName();
     final ElementName destClass = dest.getElementName();
-    if (type.equals(INHERITANCE)) {
+    if (type.equals(INHERITANCE) || type.equals(IMPLEMENTS)) {
       LinkedHashSet<ElementName> p = new LinkedHashSet<ElementName>();
       p.add(destClass);
       m.put(sourceClass, p);
