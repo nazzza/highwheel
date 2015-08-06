@@ -42,7 +42,6 @@ public class OrphanAnalysis {
 
     return orphansAfterInheritanceAnalysis(
         orphansWithoutInitConstructors(orphans), idmbv.getMap(), mdgbv);
-    // return orphansWithoutInitConstructors(orphans);
 
   }
 
@@ -89,11 +88,6 @@ public class OrphanAnalysis {
     return cleanOrphans;
   }
 
-  private boolean noEntryPoints(final Collection<AccessPoint> orphans,
-      final MethodDependencyGraphBuildingVisitor mdgbv) {
-    return mdgbv.getEntryPoints().isEmpty();
-  }
-
   private void parentsAnalysis(final DefaultHierarchyOracle dho,
       final Collection<AccessPoint> cleanOrphans, final AccessPoint o,
       final AccessPoint method) {
@@ -104,6 +98,11 @@ public class OrphanAnalysis {
         }
       }
     }
+  }
+
+  private boolean noEntryPoints(final Collection<AccessPoint> orphans,
+      final MethodDependencyGraphBuildingVisitor mdgbv) {
+    return mdgbv.getEntryPoints().isEmpty();
   }
 
   private boolean hasParents(final ElementName element,
