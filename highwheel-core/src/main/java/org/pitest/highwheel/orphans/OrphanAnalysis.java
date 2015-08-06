@@ -13,7 +13,6 @@ import org.pitest.highwheel.cycles.DefaultHierarchyOracle;
 import org.pitest.highwheel.cycles.InheritanceDependencyMapBuildingVisitor;
 import org.pitest.highwheel.cycles.MethodDependencyGraphBuildingVisitor;
 import org.pitest.highwheel.model.AccessPoint;
-import org.pitest.highwheel.model.AccessPointName;
 import org.pitest.highwheel.model.ElementName;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -65,7 +64,6 @@ public class OrphanAnalysis {
       final Collection<AccessPoint> orphans,
       final Map<ElementName, Set<ElementName>> map,
       final DirectedGraph<AccessPoint, Integer> graph) {
-
     DefaultHierarchyOracle dho = new DefaultHierarchyOracle(map);
     return inheritanceAnalysis(orphans, graph, dho);
   }
@@ -78,51 +76,32 @@ public class OrphanAnalysis {
     Collection<AccessPoint> cleanOrphans = new LinkedHashSet<AccessPoint>();
 
     for (AccessPoint o : orphans) {
-
-      ElementName orphanHoldingClass = o.getElementName();
-      AccessPointName orphanMethod = o.getAttribute();
-
-      if (dho.findParents(orphanHoldingClass).isEmpty()
-          && dho.findChildren(orphanHoldingClass).isEmpty()) {
-        return orphans;
-      }
-
-      for (ElementName parent : dho.findParents(orphanHoldingClass)) {
-
+      if (hasParents(o.getElementName(), dho)) {
         for (AccessPoint method : graph.getVertices()) {
-
-          ElementName currentMethodHoldingClass = method.getElementName();
-          AccessPointName methodInsideCurrentClass = method.getAttribute();
-
-          // if method belongs to the parent and it has the same signature as
-          // the orphan method, this method is not an orphan
-          if (currentMethodHoldingClass.equals(parent)) {
-            if (!methodInsideCurrentClass.equals(orphanMethod)) {
-              cleanOrphans.add(o);
-            }
-          }
-
+          parentsAnalysis(dho, cleanOrphans, o, method);
         }
-      }
-
-      for (ElementName child : dho.findChildren(orphanHoldingClass)) {
-
-        for (AccessPoint method : graph.getVertices()) {
-
-          ElementName currentMethodHoldingClass = method.getElementName();
-          AccessPointName methodInsideCurrentClass = method.getAttribute();
-
-          if (currentMethodHoldingClass.equals(child)) {
-            if (!methodInsideCurrentClass.equals(orphanMethod)
-                && !methodInsideCurrentClass.toString().equals("(init)")) {
-              cleanOrphans.add(o);
-            }
-          }
-
-        }
+      } else {
+        cleanOrphans.add(o);
       }
     }
     return cleanOrphans;
+  }
+
+  private void parentsAnalysis(final DefaultHierarchyOracle dho,
+      final Collection<AccessPoint> cleanOrphans, final AccessPoint o,
+      final AccessPoint method) {
+    for (ElementName parent : dho.findParents(o.getElementName())) {
+      if (method.getElementName().equals(parent)) {
+        if (!method.getAttribute().equals(o.getAttribute())) {
+          cleanOrphans.add(o);
+        }
+      }
+    }
+  }
+
+  private boolean hasParents(final ElementName element,
+      final DefaultHierarchyOracle dho) {
+    return !dho.findParents(element).isEmpty();
   }
 
 }

@@ -44,6 +44,9 @@ import com.example.scenarios.InterfaceCall.AnInterfaceWithAMethod;
 import com.example.scenarios.InterfaceCall.EntryPoint;
 import com.example.scenarios.InterfaceCall.ImplementsAnInterfaceWithAMethod;
 
+import somehaveparents.ExtendsMooWithAMethod;
+import somehaveparents.MooWithAMethod;
+
 public class OrphanAnalyserSystemTest {
 
   private OrphanAnalysis testee;
@@ -60,6 +63,7 @@ public class OrphanAnalyserSystemTest {
 
   @Test
   public void shouldReturnUncalledMethodWhenSingleClass() throws IOException {
+    setUpNoEntryPoints();
     assertThat(testee.findOrphans(createRootFor(Foo.class)))
         .contains(access(Foo.class, method("aMethod", Object.class)));
   }
@@ -72,6 +76,7 @@ public class OrphanAnalyserSystemTest {
   @Test
   public void shouldReturnUnconnectedMethodsWhenClasessWithNoEntryPoint()
       throws IOException {
+    setUpNoEntryPoints();
     assertThat(
         testee.findOrphans(createRootFor(Foo.class, HasFooAsParameter.class)))
             .contains(
@@ -131,44 +136,60 @@ public class OrphanAnalyserSystemTest {
   }
 
   @Test
-  public void shouldNotReturnAMethodImplementedFromAnInterfaceWhenEntryPoint()
+  public void shouldReturnAMethodImplementedFromAnInterfaceIfNeverCalledThroughAnInterface()
       throws IOException {
     when(this.epr.isEntryPoint(anyInt(), eq("entryPoint"), anyString()))
         .thenReturn(true);
     assertThat(
         testee.findOrphans(createRootFor(ImplementsAnInterfaceWithAMethod.class,
-            EntryPoint.class, AnInterfaceWithAMethod.class))).isEmpty();
+            EntryPoint.class, AnInterfaceWithAMethod.class)))
+                .contains(access(AnInterfaceWithAMethod.class,
+                    method("aMethodToImplement", Object.class)));
   }
 
   @Test
-  public void shouldNotReturnAMethodInheritedFromAParentClassWhenEntryPoint()
+  public void shouldReturnAMethodFromAParentClassIfNeverCalledThroughAParentClass()
       throws IOException {
     when(this.epr.isEntryPoint(anyInt(), eq("entryPoint"), anyString()))
         .thenReturn(true);
     assertThat(testee.findOrphans(createRootFor(ParentClass.class,
         ChildClassExtendsParentClass.class, EntryPointInheritace.class)))
-            .doesNotContain(access(ChildClassExtendsParentClass.class,
+            .contains(access(ParentClass.class,
                 method("parentMethod", Object.class)));
   }
 
   @Test
   public void shouldReturnOrphanMethodsWhenNoEntryPointInheritance()
       throws IOException {
-    when(this.epr.isEntryPoint(anyInt(), eq("entryPoint"), anyString()))
-        .thenReturn(false);
+    setUpNoEntryPoints();
     assertThat(testee.findOrphans(createRootFor(AParentWithAMethod.class,
         AChildImplementingAParentWithAMethod.class,
         EntryPointForInheritanceCall.class))).hasSize(3);
   }
 
+  private void setUpNoEntryPoints() {
+    when(this.epr.isEntryPoint(anyInt(), anyString(), anyString()))
+        .thenReturn(false);
+  }
+
   @Test
   public void shouldReturnOrphanMethodsWhenNoEntryPointInterface()
       throws IOException {
-    when(this.epr.isEntryPoint(anyInt(), eq("entryPoint"), anyString()))
-        .thenReturn(false);
+    setUpNoEntryPoints();
     assertThat(
         testee.findOrphans(createRootFor(ImplementsAnInterfaceWithAMethod.class,
             EntryPoint.class, AnInterfaceWithAMethod.class))).hasSize(3);
+  }
+
+  @Test
+  public void shouldDoStuff() throws IOException {
+    setUpNoEntryPoints();
+    assertThat(testee.findOrphans(createRootFor(Foo.class, MooWithAMethod.class,
+        ExtendsMooWithAMethod.class))).contains(
+            access(Foo.class, method("aMethod", Object.class)),
+            access(MooWithAMethod.class, method("aMethod", Object.class)),
+            access(ExtendsMooWithAMethod.class,
+                method("aMethod", Object.class)));
   }
 
   private Filter matchOnlyExampleDotCom() {
