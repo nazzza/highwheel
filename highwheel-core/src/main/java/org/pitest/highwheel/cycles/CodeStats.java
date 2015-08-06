@@ -3,6 +3,7 @@ package org.pitest.highwheel.cycles;
 import java.util.Collection;
 
 import org.pitest.highwheel.model.Access;
+import org.pitest.highwheel.model.AccessPoint;
 import org.pitest.highwheel.model.ElementName;
 
 public class CodeStats {
@@ -43,6 +44,11 @@ public class CodeStats {
 
   public Integer getDistance(final Access each) {
     return this.distance.distance(each.getSource(), each.getDest());
+  }
+
+  public Collection<AccessPoint> getMethods() {
+    return this.g.orphansList();
+
   }
 
 }

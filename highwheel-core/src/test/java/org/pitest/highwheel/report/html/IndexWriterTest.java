@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.LinkedHashSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.pitest.highwheel.cycles.CodeGraphs;
 import org.pitest.highwheel.cycles.CodeStats;
+import org.pitest.highwheel.model.AccessPoint;
 import org.pitest.highwheel.model.Dependency;
 import org.pitest.highwheel.model.ElementName;
 import org.pitest.highwheel.oracle.DependencyOracle;
@@ -96,7 +98,7 @@ public class IndexWriterTest {
     final Document d = parseOutput();
     final NodeList links = d.getElementsByTagName("a");
     assertThat(
-        links.item(2).getAttributes().getNamedItem("href").getTextContent())
+        links.item(3).getAttributes().getNamedItem("href").getTextContent())
             .isEqualTo("lost_tests.html");
   }
 
@@ -108,7 +110,7 @@ public class IndexWriterTest {
     final Document d = parseOutput();
     final NodeList links = d.getElementsByTagName("a");
     assertThat(
-        links.item(3).getAttributes().getNamedItem("href").getTextContent())
+        links.item(2).getAttributes().getNamedItem("href").getTextContent())
             .isEqualTo("orphan_groups.html");
   }
 
@@ -128,7 +130,7 @@ public class IndexWriterTest {
     assertFirstLinkIs("class_tangle_0.html");
   }
 
-  private void assertFirstLinkIs(String value)
+  private void assertFirstLinkIs(final String value)
       throws SAXException, IOException {
     final Document d = parseOutput();
     final NodeList links = d.getElementsByTagName("a");
@@ -155,7 +157,8 @@ public class IndexWriterTest {
 
   private CodeStats emptyCodeStats() {
     final CodeGraphs g = new CodeGraphs(
-        new DirectedSparseGraph<ElementName, Dependency>());
+        new DirectedSparseGraph<ElementName, Dependency>(),
+        new LinkedHashSet<AccessPoint>());
     return new CodeStats(g);
   }
 

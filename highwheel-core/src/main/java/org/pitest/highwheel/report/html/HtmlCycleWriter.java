@@ -16,10 +16,11 @@ public class HtmlCycleWriter extends CompoundCycleVisitor {
 
   private static Collection<CycleReporter> makeChildren(
       final DependencyOracle dependencyScorer, final StreamFactory streams) {
-    return Arrays.<CycleReporter> asList(new IndexWriter(dependencyScorer,
-        streams), new CycleWriter(dependencyScorer, streams),
-        new ClassesWriter(streams), new PackagesWriter(streams),
-        new ResourceWriter(streams));
+    return Arrays.<CycleReporter> asList(
+        new IndexWriter(dependencyScorer, streams),
+        new CycleWriter(dependencyScorer, streams), new ClassesWriter(streams),
+        new PackagesWriter(streams), new ResourceWriter(streams),
+        new OrphanGroupsWriter(streams));
   }
 
 }

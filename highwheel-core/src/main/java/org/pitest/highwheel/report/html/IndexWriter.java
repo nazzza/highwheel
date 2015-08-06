@@ -56,9 +56,9 @@ public class IndexWriter extends BaseWriter {
   public void end() {
     writeIndex("</ul></section>");
     writeIndex(
-        "<section><h1>Lost tests</h1><ul><li><a href=\"lost_tests.html\">lost_tests</a></li></ul></section>");
-    writeIndex(
         "<section><h1>Orphan groups</h1><ul><li><a href=\"orphan_groups.html\">orphan_groups</a></li></ul></section>");
+    writeIndex(
+        "<section><h1>Lost tests</h1><ul><li><a href=\"lost_tests.html\">lost_tests</a></li></ul></section>");
 
     this.writeFooter(INDEX);
   }

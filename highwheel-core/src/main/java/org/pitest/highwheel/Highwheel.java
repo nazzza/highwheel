@@ -15,6 +15,7 @@ import org.pitest.highwheel.losttests.LostTestVisitor;
 import org.pitest.highwheel.model.Dependency;
 import org.pitest.highwheel.model.ElementName;
 import org.pitest.highwheel.oracle.DependencyOracle;
+import org.pitest.highwheel.orphans.OrphanAnalysis;
 import org.pitest.highwheel.report.FileStreamFactory;
 import org.pitest.highwheel.report.html.HtmlCycleWriter;
 
@@ -43,7 +44,8 @@ public class Highwheel {
 
     this.parser.parse(mainRoot, v);
 
-    final CodeGraphs g = new CodeGraphs(classGraph);
+    final OrphanAnalysis oa = new OrphanAnalysis(parser);
+    final CodeGraphs g = new CodeGraphs(classGraph, oa.findOrphans(mainRoot));
     final CycleAnalyser cycleAnalyser = new CycleAnalyser();
     final CycleReporter r = new HtmlCycleWriter(this.dependencyOracle,
         this.fsf);
