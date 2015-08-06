@@ -26,11 +26,16 @@ import org.pitest.highwheel.model.ElementName;
 import org.pitest.highwheel.orphans.OrphanAnalysis;
 
 import com.example.CallsFooMethod;
+import com.example.CallsMethodFromKoo;
+import com.example.ExtendsKoo;
+import com.example.ExtendsMooWithAMethod;
 import com.example.Foo;
 import com.example.FooWithAVoidMethod;
 import com.example.HasAMisleadingMethodName;
 import com.example.HasFooAsMember;
 import com.example.HasFooAsParameter;
+import com.example.Koo;
+import com.example.MooWithAMethod;
 import com.example.Unconnected;
 import com.example.InheritanceCall.AChildImplementingAParentWithAMethod;
 import com.example.InheritanceCall.AParentWithAMethod;
@@ -43,9 +48,6 @@ import com.example.scenarios.Inheritance.ParentClass;
 import com.example.scenarios.InterfaceCall.AnInterfaceWithAMethod;
 import com.example.scenarios.InterfaceCall.EntryPoint;
 import com.example.scenarios.InterfaceCall.ImplementsAnInterfaceWithAMethod;
-
-import somehaveparents.ExtendsMooWithAMethod;
-import somehaveparents.MooWithAMethod;
 
 public class OrphanAnalyserSystemTest {
 
@@ -182,14 +184,22 @@ public class OrphanAnalyserSystemTest {
   }
 
   @Test
-  public void shouldDoStuff() throws IOException {
-    setUpNoEntryPoints();
+  public void shouldReturnOrphanMethodsWhenNoEntryPointUnrelatedMethodsAndInheritance()
+      throws IOException {
+    when(this.epr.isEntryPoint(anyInt(), eq("aMethod"), anyString()))
+        .thenReturn(true);
     assertThat(testee.findOrphans(createRootFor(Foo.class, MooWithAMethod.class,
-        ExtendsMooWithAMethod.class))).contains(
-            access(Foo.class, method("aMethod", Object.class)),
-            access(MooWithAMethod.class, method("aMethod", Object.class)),
-            access(ExtendsMooWithAMethod.class,
-                method("aMethod", Object.class)));
+        ExtendsMooWithAMethod.class))).isEmpty();
+  }
+
+  @Test
+  public void shouldReturnOrphanMethodWhenEntryPointInInheritance()
+      throws IOException {
+    when(this.epr.isEntryPoint(anyInt(), eq("entryPoint"), anyString()))
+        .thenReturn(true);
+    assertThat(testee.findOrphans(createRootFor(Foo.class, Koo.class,
+        ExtendsKoo.class, CallsMethodFromKoo.class)))
+            .containsOnly(access(Foo.class, method("aMethod", Object.class)));
   }
 
   private Filter matchOnlyExampleDotCom() {

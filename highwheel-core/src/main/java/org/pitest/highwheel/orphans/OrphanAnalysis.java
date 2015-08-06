@@ -15,7 +15,6 @@ import org.pitest.highwheel.cycles.MethodDependencyGraphBuildingVisitor;
 import org.pitest.highwheel.model.AccessPoint;
 import org.pitest.highwheel.model.ElementName;
 
-import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 
 public class OrphanAnalysis {
@@ -42,8 +41,7 @@ public class OrphanAnalysis {
         mdgbv.getEntryPoints());
 
     return orphansAfterInheritanceAnalysis(
-        orphansWithoutInitConstructors(orphans), idmbv.getMap(),
-        mdgbv.getGraph());
+        orphansWithoutInitConstructors(orphans), idmbv.getMap(), mdgbv);
     // return orphansWithoutInitConstructors(orphans);
 
   }
@@ -63,21 +61,25 @@ public class OrphanAnalysis {
   private Collection<AccessPoint> orphansAfterInheritanceAnalysis(
       final Collection<AccessPoint> orphans,
       final Map<ElementName, Set<ElementName>> map,
-      final DirectedGraph<AccessPoint, Integer> graph) {
-    DefaultHierarchyOracle dho = new DefaultHierarchyOracle(map);
-    return inheritanceAnalysis(orphans, graph, dho);
+      final MethodDependencyGraphBuildingVisitor mdgbv) {
+
+    if (noEntryPoints(orphans, mdgbv)) {
+      return orphans;
+    }
+    return inheritanceAnalysis(orphans, map, mdgbv);
   }
 
   private Collection<AccessPoint> inheritanceAnalysis(
       final Collection<AccessPoint> orphans,
-      final DirectedGraph<AccessPoint, Integer> graph,
-      final DefaultHierarchyOracle dho) {
+      final Map<ElementName, Set<ElementName>> map,
+      final MethodDependencyGraphBuildingVisitor mdgbv) {
 
+    DefaultHierarchyOracle dho = new DefaultHierarchyOracle(map);
     Collection<AccessPoint> cleanOrphans = new LinkedHashSet<AccessPoint>();
 
     for (AccessPoint o : orphans) {
       if (hasParents(o.getElementName(), dho)) {
-        for (AccessPoint method : graph.getVertices()) {
+        for (AccessPoint method : mdgbv.getGraph().getVertices()) {
           parentsAnalysis(dho, cleanOrphans, o, method);
         }
       } else {
@@ -85,6 +87,11 @@ public class OrphanAnalysis {
       }
     }
     return cleanOrphans;
+  }
+
+  private boolean noEntryPoints(final Collection<AccessPoint> orphans,
+      final MethodDependencyGraphBuildingVisitor mdgbv) {
+    return mdgbv.getEntryPoints().isEmpty();
   }
 
   private void parentsAnalysis(final DefaultHierarchyOracle dho,
