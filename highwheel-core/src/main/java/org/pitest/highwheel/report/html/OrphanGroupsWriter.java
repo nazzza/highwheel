@@ -21,10 +21,14 @@ class OrphanGroupsWriter extends BaseWriter {
     writeHeader(FILENAME);
 
     write(FILENAME, "<section class ='deps'>");
+    write(FILENAME, "<h1>Total method count: ");
+    write(FILENAME, stats.getMethods().getVertexCount() + "</h1>");
+    write(FILENAME, "<h1>Orphan method count: ");
+    write(FILENAME, stats.getOrphanMethods().size() + "</h1>");
     write(FILENAME,
         "<table id=\"sorttable\" class=\"tablesorter\"><thead><tr><th>class</th><th>method</th></tr></thead>");
     write(FILENAME, "<tbody>");
-    for (final AccessPoint each : stats.getMethods()) {
+    for (final AccessPoint each : stats.getOrphanMethods()) {
       write(FILENAME, "<tr><td>" + each.getElementName() + "</td><td>"
           + each.getAttribute() + "</td></tr>");
     }

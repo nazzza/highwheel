@@ -74,7 +74,8 @@ public class OrphanGroupsWriterTest {
   private CodeStats emptyCodeStats() {
     final CodeGraphs g = new CodeGraphs(
         new DirectedSparseGraph<ElementName, Dependency>(),
-        new LinkedHashSet<AccessPoint>());
+        new LinkedHashSet<AccessPoint>(),
+        new DirectedSparseGraph<AccessPoint, Integer>());
     return new CodeStats(g);
   }
 

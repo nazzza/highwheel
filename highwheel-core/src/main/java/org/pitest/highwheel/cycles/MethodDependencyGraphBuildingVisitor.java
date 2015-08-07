@@ -15,7 +15,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 public class MethodDependencyGraphBuildingVisitor implements AccessVisitor {
 
   private final DirectedGraph<AccessPoint, Integer> g;
-  private List<AccessPoint>                         ep = new ArrayList<AccessPoint>();
+  private final List<AccessPoint>                   ep = new ArrayList<AccessPoint>();
 
   public MethodDependencyGraphBuildingVisitor(
       final DirectedGraph<AccessPoint, Integer> g) {
@@ -25,6 +25,9 @@ public class MethodDependencyGraphBuildingVisitor implements AccessVisitor {
   @Override
   public void apply(final AccessPoint source, final AccessPoint dest,
       final AccessType type) {
+    if (!source.hasAttribute() || !dest.hasAttribute()) {
+      return;
+    }
     if (type.equals(USES)) {
       int edge = g.getEdgeCount() + 1;
       this.g.addEdge(edge, source, dest);
@@ -46,12 +49,16 @@ public class MethodDependencyGraphBuildingVisitor implements AccessVisitor {
 
   @Override
   public void newEntryPoint(final AccessPoint ap) {
-    ep.add(ap);
+    if (ap.hasAttribute()) {
+      ep.add(ap);
+    }
   }
 
   @Override
-  public void newAccessPoint(AccessPoint ap) {
-    this.g.addVertex(ap);
+  public void newAccessPoint(final AccessPoint ap) {
+    if (ap.hasAttribute()) {
+      this.g.addVertex(ap);
+    }
   }
 
 }

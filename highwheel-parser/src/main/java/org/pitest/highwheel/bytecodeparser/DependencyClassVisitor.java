@@ -19,12 +19,18 @@ import org.pitest.highwheel.model.ElementName;
 class DefaultEntryPointRecogniser implements EntryPointRecogniser {
 
   @Override
-  public boolean isEntryPoint(int access, String name, String desc) {
+  public boolean isEntryPoint(final int access, final String name,
+      final String desc) {
+    return isJavaMain(access, name, desc);
+  }
+
+  private boolean isJavaMain(final int access, final String name,
+      final String desc) {
     return isStatic(access) && name.equals("main")
         && desc.equals("([Ljava/lang/String;)V");
   }
 
-  private boolean isStatic(int access) {
+  private boolean isStatic(final int access) {
     return (Opcodes.ACC_STATIC & access) != 0;
   }
 
@@ -40,8 +46,8 @@ class DependencyClassVisitor extends ClassVisitor {
   private AccessPoint                parent;
 
   public DependencyClassVisitor(final ClassVisitor visitor,
-      final AccessVisitor typeReceiver, NameTransformer nameTransformer,
-      EntryPointRecogniser entryPointRecogniser) {
+      final AccessVisitor typeReceiver, final NameTransformer nameTransformer,
+      final EntryPointRecogniser entryPointRecogniser) {
     super(Opcodes.ASM4, visitor);
     this.dependencyVisitor = filterOutJavaLangObject(typeReceiver);
     this.nameTransformer = nameTransformer;
@@ -67,12 +73,12 @@ class DependencyClassVisitor extends ClassVisitor {
       }
 
       @Override
-      public void newEntryPoint(AccessPoint ap) {
+      public void newEntryPoint(final AccessPoint ap) {
         child.newEntryPoint(ap);
       }
 
       @Override
-      public void newAccessPoint(AccessPoint ap) {
+      public void newAccessPoint(final AccessPoint ap) {
         child.newAccessPoint(ap);
       }
 

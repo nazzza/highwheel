@@ -45,7 +45,8 @@ public class CycleAnalyserTest {
   @Test
   public void shouldSendCodeStatsToVisitor() {
     classGraph.addEdge(dep(foo, bar, AccessType.COMPOSED), foo, bar);
-    testee.analyse(new CodeGraphs(classGraph, oa), r);
+    testee.analyse(new CodeGraphs(classGraph, oa,
+        new DirectedSparseGraph<AccessPoint, Integer>()), r);
     verify(r).start(any(CodeStats.class));
   }
 
@@ -53,7 +54,8 @@ public class CycleAnalyserTest {
   @Test
   public void shouldNotReportSingleItemComponents() {
     classGraph.addEdge(dep(foo, bar, AccessType.COMPOSED), foo, bar);
-    testee.analyse(new CodeGraphs(classGraph, oa), r);
+    testee.analyse(new CodeGraphs(classGraph, oa,
+        new DirectedSparseGraph<AccessPoint, Integer>()), r);
     verify(r, never())
         .visitClassStronglyConnectedComponent(any(DirectedGraph.class));
   }
@@ -65,7 +67,8 @@ public class CycleAnalyserTest {
     classGraph.addEdge(dep(foo, bar, AccessType.COMPOSED), bar, far);
     classGraph.addEdge(dep(foo, bar, AccessType.COMPOSED), far, foo);
 
-    testee.analyse(new CodeGraphs(classGraph, oa), r);
+    testee.analyse(new CodeGraphs(classGraph, oa,
+        new DirectedSparseGraph<AccessPoint, Integer>()), r);
     verify(r).visitClassStronglyConnectedComponent(any(DirectedGraph.class));
     verify(r).endClassStronglyConnectedComponent(any(DirectedGraph.class));
     verify(r).visitClassSubCycle(any(DirectedGraph.class));
@@ -77,7 +80,8 @@ public class CycleAnalyserTest {
     classGraph.addEdge(dep(foo, bar, AccessType.COMPOSED), foo, bar);
     classGraph.addEdge(dep(foo, bar, AccessType.COMPOSED), bar, foo);
 
-    testee.analyse(new CodeGraphs(classGraph, oa), r);
+    testee.analyse(new CodeGraphs(classGraph, oa,
+        new DirectedSparseGraph<AccessPoint, Integer>()), r);
     verify(r).visitClassStronglyConnectedComponent(any(DirectedGraph.class));
     verify(r, never()).visitClassSubCycle(any(DirectedGraph.class));
   }
@@ -89,7 +93,8 @@ public class CycleAnalyserTest {
     classGraph.addEdge(dep(bar, far, AccessType.COMPOSED), bar, far);
     classGraph.addEdge(dep(far, foo, AccessType.COMPOSED), far, foo);
 
-    testee.analyse(new CodeGraphs(classGraph, oa), r);
+    testee.analyse(new CodeGraphs(classGraph, oa,
+        new DirectedSparseGraph<AccessPoint, Integer>()), r);
     verify(r).visitPackageStronglyConnectedComponent(any(DirectedGraph.class));
     verify(r).endPackageStronglyConnectedComponent(any(DirectedGraph.class));
     verify(r).visitSubCycle(any(DirectedGraph.class));
@@ -101,20 +106,23 @@ public class CycleAnalyserTest {
     classGraph.addEdge(dep(foo, bar, AccessType.COMPOSED), foo, bar);
     classGraph.addEdge(dep(bar, foo, AccessType.COMPOSED), bar, foo);
 
-    testee.analyse(new CodeGraphs(classGraph, oa), r);
+    testee.analyse(new CodeGraphs(classGraph, oa,
+        new DirectedSparseGraph<AccessPoint, Integer>()), r);
     verify(r).visitPackageStronglyConnectedComponent(any(DirectedGraph.class));
     verify(r, never()).visitSubCycle(any(DirectedGraph.class));
   }
 
   @Test
   public void shouldSignalEndOfClassCycles() {
-    testee.analyse(new CodeGraphs(classGraph, oa), r);
+    testee.analyse(new CodeGraphs(classGraph, oa,
+        new DirectedSparseGraph<AccessPoint, Integer>()), r);
     verify(r).endClassCycles();
   }
 
   @Test
   public void shouldSignalEndOfAnalysis() {
-    testee.analyse(new CodeGraphs(classGraph, oa), r);
+    testee.analyse(new CodeGraphs(classGraph, oa,
+        new DirectedSparseGraph<AccessPoint, Integer>()), r);
     verify(r).end();
   }
 

@@ -14,14 +14,17 @@ public class CodeGraphs {
   private final DirectedGraph<ElementName, Dependency> classGraph;
   private final DirectedGraph<ElementName, Dependency> packageGraph;
   private final Collection<AccessPoint>                orphansList;
+  private final DirectedGraph<AccessPoint, Integer>    methodGraph;
 
   public CodeGraphs(final DirectedGraph<ElementName, Dependency> classGraph,
-      final Collection<AccessPoint> orphansList) {
+      final Collection<AccessPoint> orphansList,
+      final DirectedGraph<AccessPoint, Integer> methodGraph) {
     this.classGraph = classGraph;
     this.packageGraph = PackageGraphGenerator.makePackageGraph(classGraph);
     this.packageNameGraph = PackageNameGraphGenerator
         .generateGraph(this.packageGraph.getVertices());
     this.orphansList = orphansList;
+    this.methodGraph = methodGraph;
   }
 
   public DirectedGraph<ElementName, Integer> packageNameGraph() {
@@ -38,6 +41,10 @@ public class CodeGraphs {
 
   public Collection<AccessPoint> orphansList() {
     return this.orphansList;
+  }
+
+  public DirectedGraph<AccessPoint, Integer> methodGraph() {
+    return this.methodGraph;
   }
 
 }

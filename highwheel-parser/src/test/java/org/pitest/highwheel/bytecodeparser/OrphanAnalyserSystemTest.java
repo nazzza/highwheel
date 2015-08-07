@@ -1,6 +1,7 @@
 package org.pitest.highwheel.bytecodeparser;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -27,6 +28,7 @@ import org.pitest.highwheel.orphans.OrphanAnalysis;
 
 import com.example.CallsFooMethod;
 import com.example.CallsMethodFromKoo;
+import com.example.ClassWithAPrivateEnum;
 import com.example.ExtendsKoo;
 import com.example.ExtendsMooWithAMethod;
 import com.example.Foo;
@@ -40,6 +42,7 @@ import com.example.Unconnected;
 import com.example.InheritanceCall.AChildImplementingAParentWithAMethod;
 import com.example.InheritanceCall.AParentWithAMethod;
 import com.example.InheritanceCall.EntryPointForInheritanceCall;
+import com.example.enums.FooEnum;
 import com.example.scenarios.MemberOfCycle1;
 import com.example.scenarios.MemberOfCycle2;
 import com.example.scenarios.Inheritance.ChildClassExtendsParentClass;
@@ -200,6 +203,23 @@ public class OrphanAnalyserSystemTest {
     assertThat(testee.findOrphans(createRootFor(Foo.class, Koo.class,
         ExtendsKoo.class, CallsMethodFromKoo.class)))
             .containsOnly(access(Foo.class, method("aMethod", Object.class)));
+  }
+
+  @Test
+  public void shouldNotNullPointerWhenEnumsOnClasspath() throws IOException {
+    try {
+      testee.findOrphans(createRootFor(FooEnum.class));
+      // pass
+    } catch (NullPointerException x) {
+      fail();
+    }
+  }
+
+  // ??
+  @Test
+  public void shouldNotBeEmptyWhenPrivateEnumInClass() throws IOException {
+    assertThat(testee.findOrphans(createRootFor(ClassWithAPrivateEnum.class,
+        ClassWithAPrivateEnum.ClassType.class))).isNotEmpty();
   }
 
   private Filter matchOnlyExampleDotCom() {

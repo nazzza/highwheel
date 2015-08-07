@@ -6,6 +6,8 @@ import org.pitest.highwheel.model.Access;
 import org.pitest.highwheel.model.AccessPoint;
 import org.pitest.highwheel.model.ElementName;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
+
 public class CodeStats {
 
   private final CodeGraphs              g;
@@ -46,9 +48,12 @@ public class CodeStats {
     return this.distance.distance(each.getSource(), each.getDest());
   }
 
-  public Collection<AccessPoint> getMethods() {
+  public Collection<AccessPoint> getOrphanMethods() {
     return this.g.orphansList();
+  }
 
+  public DirectedGraph<AccessPoint, Integer> getMethods() {
+    return this.g.methodGraph();
   }
 
 }

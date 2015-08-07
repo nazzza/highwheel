@@ -15,14 +15,21 @@ import org.pitest.highwheel.cycles.MethodDependencyGraphBuildingVisitor;
 import org.pitest.highwheel.model.AccessPoint;
 import org.pitest.highwheel.model.ElementName;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 
 public class OrphanAnalysis {
 
-  private final ClassParser parser;
+  private final ClassParser                    parser;
+  // graph with all the methods including inits
+  private MethodDependencyGraphBuildingVisitor mdgbv;
 
   public OrphanAnalysis(final ClassParser parser) {
     this.parser = parser;
+  }
+
+  public DirectedGraph<AccessPoint, Integer> getGraph() {
+    return mdgbv.getGraph();
   }
 
   public Collection<AccessPoint> findOrphans(final ClasspathRoot root)
@@ -30,7 +37,7 @@ public class OrphanAnalysis {
 
     // Parsing
     InheritanceDependencyMapBuildingVisitor idmbv = new InheritanceDependencyMapBuildingVisitor();
-    MethodDependencyGraphBuildingVisitor mdgbv = new MethodDependencyGraphBuildingVisitor(
+    mdgbv = new MethodDependencyGraphBuildingVisitor(
         new DirectedSparseGraph<AccessPoint, Integer>());
     this.parser.parse(root, mdgbv);
     this.parser.parse(root, idmbv);
@@ -49,7 +56,7 @@ public class OrphanAnalysis {
       final Collection<AccessPoint> orphans) {
     Collection<AccessPoint> cleanOrphans = new ArrayList<AccessPoint>();
     for (AccessPoint o : orphans) {
-      if (!o.getAttribute().toString().equals("(init)")) {
+      if (!"(init)".equals(o.getAttribute().toString())) {
         cleanOrphans.add(o);
       }
 

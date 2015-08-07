@@ -2,8 +2,8 @@ package org.pitest.highwheel.model;
 
 public final class AccessPoint {
 
-  private final ElementName clazz;
-  private final AccessPointName      attribute;
+  private final ElementName     clazz;
+  private final AccessPointName attribute;
 
   AccessPoint(final ElementName clazz, final AccessPointName attribute) {
     this.clazz = clazz;
@@ -19,7 +19,7 @@ public final class AccessPoint {
     return new AccessPoint(clazz, null);
   }
 
-  public AccessPoint methodAccess(AccessPointName method) {
+  public AccessPoint methodAccess(final AccessPointName method) {
     return create(this.clazz, method);
   }
 
@@ -29,6 +29,10 @@ public final class AccessPoint {
 
   public AccessPointName getAttribute() {
     return this.attribute;
+  }
+
+  public boolean hasAttribute() {
+    return getAttribute() != null;
   }
 
   @Override
@@ -41,24 +45,31 @@ public final class AccessPoint {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
+  public boolean equals(final Object obj) {
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }
     AccessPoint other = (AccessPoint) obj;
     if (attribute == null) {
-      if (other.attribute != null)
+      if (other.attribute != null) {
         return false;
-    } else if (!attribute.equals(other.attribute))
+      }
+    } else if (!attribute.equals(other.attribute)) {
       return false;
+    }
     if (clazz == null) {
-      if (other.clazz != null)
+      if (other.clazz != null) {
         return false;
-    } else if (!clazz.equals(other.clazz))
+      }
+    } else if (!clazz.equals(other.clazz)) {
       return false;
+    }
     return true;
   }
 
