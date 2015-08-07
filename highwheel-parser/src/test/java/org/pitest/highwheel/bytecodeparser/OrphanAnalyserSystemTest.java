@@ -43,6 +43,9 @@ import com.example.InheritanceCall.AChildImplementingAParentWithAMethod;
 import com.example.InheritanceCall.AParentWithAMethod;
 import com.example.InheritanceCall.EntryPointForInheritanceCall;
 import com.example.enums.FooEnum;
+import com.example.interfaces.ExtendsTop;
+import com.example.interfaces.ImplementsExtendsTop;
+import com.example.interfaces.Top;
 import com.example.scenarios.MemberOfCycle1;
 import com.example.scenarios.MemberOfCycle2;
 import com.example.scenarios.Inheritance.ChildClassExtendsParentClass;
@@ -220,6 +223,13 @@ public class OrphanAnalyserSystemTest {
   public void shouldNotBeEmptyWhenPrivateEnumInClass() throws IOException {
     assertThat(testee.findOrphans(createRootFor(ClassWithAPrivateEnum.class,
         ClassWithAPrivateEnum.ClassType.class))).isNotEmpty();
+  }
+
+  @Test
+  public void shouldDoStuff() throws IOException {
+    assertThat(testee.findOrphans(
+        createRootFor(Top.class, ExtendsTop.class, ImplementsExtendsTop.class)))
+            .isNotEmpty();
   }
 
   private Filter matchOnlyExampleDotCom() {

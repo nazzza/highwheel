@@ -29,6 +29,7 @@ public class InheritanceDependencyMapBuildingVisitor implements AccessVisitor {
     final ElementName destClass = dest.getElementName();
     if (type.equals(INHERITANCE) || type.equals(IMPLEMENTS)) {
       LinkedHashSet<ElementName> p = new LinkedHashSet<ElementName>();
+      // FIXME this ojnly allows 1 parent
       p.add(destClass);
       m.put(sourceClass, p);
     }

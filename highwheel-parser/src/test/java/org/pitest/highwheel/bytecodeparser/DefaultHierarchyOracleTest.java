@@ -48,7 +48,7 @@ public class DefaultHierarchyOracleTest {
     m.put(element(ExtendsFoo.class), Collections.set(element(Foo.class)));
     testee = new DefaultHierarchyOracle(m);
     assertThat(testee.findParents(element(ExtendsFoo2ndTime.class)))
-        .contains(element(ExtendsFoo.class), element(Foo.class));
+        .contains(element(ExtendsFoo.class));
   }
 
   @Test
@@ -62,9 +62,8 @@ public class DefaultHierarchyOracleTest {
         Collections.set(element(ExtendsFoo.class)));
     m.put(element(ExtendsFoo.class), Collections.set(element(Foo.class)));
     testee = new DefaultHierarchyOracle(m);
-    assertThat(testee.findParents(element(ExtendsFoo3rdTime.class))).contains(
-        element(ExtendsFoo2ndTime.class), element(ExtendsFoo.class),
-        element(Foo.class));
+    assertThat(testee.findParents(element(ExtendsFoo3rdTime.class)))
+        .contains(element(ExtendsFoo2ndTime.class));
   }
 
   @Test
@@ -80,9 +79,9 @@ public class DefaultHierarchyOracleTest {
     m.put(element(ExtendsMoo.class), Collections.set(element(Moo.class)));
     testee = new DefaultHierarchyOracle(m);
     assertThat(testee.findParents(element(ExtendsFoo2ndTime.class)))
-        .containsOnly(element(ExtendsFoo.class), element(Foo.class));
+        .containsOnly(element(ExtendsFoo.class));
     assertThat(testee.findParents(element(ExtendsMoo2ndTime.class)))
-        .containsOnly(element(ExtendsMoo.class), element(Moo.class));
+        .containsOnly(element(ExtendsMoo.class));
   }
 
   @Test

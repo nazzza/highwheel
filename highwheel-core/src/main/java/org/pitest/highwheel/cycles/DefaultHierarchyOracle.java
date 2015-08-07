@@ -1,5 +1,6 @@
 package org.pitest.highwheel.cycles;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -20,14 +21,11 @@ public class DefaultHierarchyOracle implements HierarchyOracle {
 
   @Override
   public Set<ElementName> findParents(final ElementName element) {
-    Set<ElementName> parents = new LinkedHashSet<ElementName>();
-    if (m.containsKey(element)) {
-      for (ElementName parent : m.get(element)) {
-        parents.add(parent);
-        parents.addAll(findParents(parent));
-      }
+    Set<ElementName> parents = m.get(element);
+    if (parents != null) {
+      return parents;
     }
-    return parents;
+    return Collections.emptySet();
   }
 
   @Override

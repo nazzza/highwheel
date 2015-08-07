@@ -45,6 +45,7 @@ public class Highwheel {
     this.parser.parse(mainRoot, v);
 
     final OrphanAnalysis oa = new OrphanAnalysis(parser);
+
     final CodeGraphs g = new CodeGraphs(classGraph, oa.findOrphans(mainRoot),
         oa.getGraph());
     final CycleAnalyser cycleAnalyser = new CycleAnalyser();

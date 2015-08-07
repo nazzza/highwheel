@@ -21,7 +21,7 @@ class DefaultEntryPointRecogniser implements EntryPointRecogniser {
   @Override
   public boolean isEntryPoint(final int access, final String name,
       final String desc) {
-    return isJavaMain(access, name, desc);
+    return isJavaMain(access, name, desc) || name.equals("execute");
   }
 
   private boolean isJavaMain(final int access, final String name,
